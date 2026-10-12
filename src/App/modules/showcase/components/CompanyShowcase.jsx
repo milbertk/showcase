@@ -21,6 +21,7 @@ import {
   FaFacebookMessenger,
   FaLink,
   FaLocationDot,
+  FaImage,
   FaMagnifyingGlass,
   FaMinus,
   FaPhone,
@@ -53,6 +54,8 @@ const webOrderRequestService = new WebOrderRequestService();
 const showcaseLoginService = new ShowcaseLoginService();
 
 const showcaseService = new ShowcaseService();
+
+const SHOWCASE_HERO_IMAGE = "/assets/showcase-hero.png";
 
 
 export const COMPANY_SHOWCASE_ROUTE = "/:companySlug";
@@ -979,6 +982,7 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
   const [notice, setNotice] = useState("");
 
   const [remoteProducts, setRemoteProducts] = useState([]);
+  const [remoteCompany, setRemoteCompany] = useState(null);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [loadError, setLoadError] = useState("");
 
@@ -990,12 +994,24 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
   // public page renders with the real products. A public company-info endpoint
   // can replace this fallback later.
   const company =
+    (remoteCompany && {
+      id: companySlug,
+      slug: companySlug,
+      name: remoteCompany.companyName || remoteCompany.name || remoteCompany.businessName || "",
+      shortDescription: remoteCompany.shortDescription || remoteCompany.tagline || "",
+      description: remoteCompany.description || "",
+      brandColor: remoteCompany.brandColor || "#155e75",
+      accentColor: remoteCompany.accentColor || "#f59e0b",
+      whatsappNumber: remoteCompany.whatsappNumber || remoteCompany.webContactPhone || "",
+      messengerHandle: remoteCompany.messengerHandle || remoteCompany.webMessengerLink || "",
+      currency: remoteCompany.currency || "USD",
+    }) ||
     matchedCompany ||
     (companySlug
       ? {
           id: companySlug,
           slug: companySlug,
-          name: "Showcase",
+          name: t("companyShowcase.fallbacks.companyName"),
           shortDescription: "",
           description: "",
           brandColor: "#3459e6",
@@ -1017,15 +1033,20 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
     setLoadError("");
 
     showcaseService
-      .getShowcaseItems({ companyId: companySlug })
-      .then((items) => {
+      .getShowcaseData({ companyId: companySlug })
+      .then(({ items, company: companyInfo }) => {
         if (!active) return;
         setRemoteProducts(mapShowcaseItems(items, companySlug));
+        const hasCompanyIdentity = Boolean(
+          companyInfo?.companyName || companyInfo?.name || companyInfo?.businessName,
+        );
+        setRemoteCompany(hasCompanyIdentity ? companyInfo : null);
       })
       .catch((error) => {
         if (!active) return;
         console.error("Error loading showcase:", error);
         setRemoteProducts([]);
+        setRemoteCompany(null);
         setLoadError(
           error?.message || "The showcase could not be loaded. Please try again.",
         );
@@ -1655,7 +1676,7 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
         <a className="showcase-brand" href={`/showcase/${company.slug}`}>
           <span><FaStore /></span>
           <div>
-            <strong>{company.name}</strong>
+            <strong>{t("companyShowcase.brandName")}</strong>
             <small>{t("companyShowcase.publicStore")}</small>
           </div>
         </a>
@@ -1697,13 +1718,21 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       </header>
 
       <div className="showcase-body">
-        <section className="showcase-company-banner">
-          <span><FaCheck /></span>
-          <div>
-            <h1>{company.shortDescription}</h1>
-            <p>{company.description}</p>
+        <section
+          className="showcase-company-banner"
+          style={{ "--showcase-hero": `url(${SHOWCASE_HERO_IMAGE})` }}
+        >
+          <div className="showcase-company-banner__content">
+            <span className="showcase-company-banner__eyebrow">
+              <FaCheck /> {t("companyShowcase.verifiedCompany")}
+            </span>
+            <h1>{company.name}</h1>
+            <p>{company.shortDescription || company.description || t("companyShowcase.fallbacks.companyDescription")}</p>
+            <a href="#showcase-products" className="showcase-company-banner__cta">
+              {t("companyShowcase.actions.explore")}
+              <FaArrowRight />
+            </a>
           </div>
-          <small>{t("companyShowcase.companyLink", { slug: company.slug })}</small>
         </section>
 
         {notice && (
@@ -1720,7 +1749,7 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
           </div>
         )}
 
-        <section className="showcase-results">
+        <section className="showcase-results" id="showcase-products">
           <div className="showcase-results__heading">
             <div>
               <h2>{t("companyShowcase.products.title")}</h2>
@@ -1739,12 +1768,19 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
             )}
           </div>
 
-          <div className="product-grid">
+          {!loadingProducts && !loadError && <div className="product-grid">
             {visibleProducts.map((product) => (
               <article className="showcase-product-card" key={product.id}>
                 <div className="showcase-product-card__image">
-                  <img src={product.image} alt={product.name} />
-                  <span>{product.category}</span>
+                  {product.image ? (
+                    <img src={product.image} alt={product.name || t("companyShowcase.fallbacks.productName")} />
+                  ) : (
+                    <div className="showcase-product-card__image-fallback" role="img" aria-label={t("companyShowcase.fallbacks.imageUnavailable")}>
+                      <FaImage />
+                      <span>{t("companyShowcase.fallbacks.imageUnavailable")}</span>
+                    </div>
+                  )}
+                  <span>{product.category || t("companyShowcase.fallbacks.category")}</span>
                   {product.allowsBooking && (
                     <em>
                       <FaCalendarCheck />
@@ -1755,9 +1791,9 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
 
                 <div className="showcase-product-card__content">
                   <div>
-                    <small>{product.code}</small>
-                    <h3>{product.name}</h3>
-                    <p>{product.description}</p>
+                    <small>{product.code || t("companyShowcase.fallbacks.code")}</small>
+                    <h3>{product.name || t("companyShowcase.fallbacks.productName")}</h3>
+                    <p>{product.description || t("companyShowcase.fallbacks.productDescription")}</p>
                   </div>
                   <strong className="showcase-product-card__price">
                     {formatPrice(product.price)}
@@ -1865,9 +1901,25 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
                 </div>
               </article>
             ))}
-          </div>
+          </div>}
 
-          {!visibleProducts.length && (
+          {loadingProducts && (
+            <div className="showcase-empty" role="status">
+              <span className="showcase-loading-dot" aria-hidden="true" />
+              <h3>{t("companyShowcase.products.loadingTitle")}</h3>
+              <p>{t("companyShowcase.products.loadingDescription")}</p>
+            </div>
+          )}
+
+          {!loadingProducts && loadError && (
+            <div className="showcase-empty showcase-empty--error" role="alert">
+              <FaStore />
+              <h3>{t("companyShowcase.products.errorTitle")}</h3>
+              <p>{t("companyShowcase.products.errorDescription")}</p>
+            </div>
+          )}
+
+          {!loadingProducts && !loadError && !visibleProducts.length && (
             <div className="showcase-empty">
               <FaMagnifyingGlass />
               <h3>{t("companyShowcase.products.emptyTitle")}</h3>
@@ -1875,7 +1927,7 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
             </div>
           )}
 
-          {filteredProducts.length > 0 && (
+          {!loadingProducts && !loadError && filteredProducts.length > 0 && (
             <nav className="showcase-pagination" aria-label={t("companyShowcase.pagination.label")}>
               <p>
                 {t("companyShowcase.pagination.summary", {

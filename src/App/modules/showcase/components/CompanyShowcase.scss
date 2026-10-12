@@ -1106,6 +1106,244 @@
 }
 
 /* =====================================================================
+   2026 storefront refresh: image-led company banner and active cards.
+   ===================================================================== */
+.company-showcase {
+  --sc-page: #f4f7f8;
+  --sc-ink: #13252b;
+  --sc-muted: #627178;
+  --sc-line: #dce4e6;
+  --sc-dark: #12343b;
+
+  background:
+    radial-gradient(circle at 8% 5%, color-mix(in srgb, var(--sc-brand) 8%, transparent), transparent 26rem),
+    var(--sc-page);
+
+  .showcase-header {
+    padding-block: 12px;
+    background: rgba(250, 252, 252, .88);
+    box-shadow: 0 1px 0 rgba(17, 52, 59, .05);
+  }
+
+  .showcase-brand > span {
+    background: linear-gradient(145deg, var(--sc-brand), var(--sc-dark));
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--sc-brand) 22%, transparent);
+  }
+
+  .showcase-search {
+    background: rgba(255, 255, 255, .8);
+    box-shadow: 0 5px 16px rgba(18, 52, 59, .05);
+    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    &:focus-within {
+      background: #fff;
+      border-color: color-mix(in srgb, var(--sc-brand) 52%, var(--sc-line));
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--sc-brand) 10%, transparent);
+    }
+  }
+
+  .showcase-body { padding-top: 1px; }
+
+  .showcase-company-banner {
+    isolation: isolate;
+    min-height: clamp(330px, 38vw, 500px);
+    justify-content: center;
+    margin: 24px 0 42px;
+    padding: clamp(30px, 6vw, 76px);
+    border-radius: 26px;
+    background-image:
+      linear-gradient(90deg, rgba(7, 29, 36, .95) 0%, rgba(7, 29, 36, .86) 38%, rgba(7, 29, 36, .2) 74%, rgba(7, 29, 36, .08) 100%),
+      var(--showcase-hero);
+    background-position: center;
+    box-shadow: 0 28px 70px rgba(18, 52, 59, .2);
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: inherit;
+      pointer-events: none;
+    }
+  }
+
+  .showcase-company-banner__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    width: min(620px, 68%);
+  }
+
+  .showcase-company-banner__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 11px;
+    border: 1px solid rgba(255, 255, 255, .26);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 750;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+  }
+
+  .showcase-company-banner h1 {
+    max-width: 14ch;
+    color: #fff;
+    font-size: clamp(2.2rem, 5vw, 4.8rem);
+    font-weight: 850;
+    letter-spacing: -.045em;
+    line-height: .98;
+    text-wrap: balance;
+  }
+
+  .showcase-company-banner p {
+    max-width: 52ch;
+    color: rgba(255, 255, 255, .82);
+    font-size: clamp(1rem, 1.5vw, 1.18rem);
+  }
+
+  .showcase-company-banner__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+    padding: 12px 18px;
+    border: 1px solid rgba(255, 255, 255, .2);
+    border-radius: 999px;
+    background: #fff;
+    color: #13353c;
+    font-weight: 800;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .18);
+    transition: gap .2s ease, transform .2s ease, background .2s ease;
+    &:hover { gap: 15px; transform: translateY(-2px); background: #f0fbfa; }
+  }
+
+  .showcase-results { scroll-margin-top: 110px; }
+  .showcase-results__heading { margin-bottom: 22px; }
+  .showcase-results__heading h2 { font-size: clamp(1.45rem, 2vw, 2rem); }
+
+  .product-grid { gap: 22px; }
+
+  .showcase-product-card {
+    position: relative;
+    border: 0;
+    border-radius: 20px;
+    box-shadow: 0 8px 26px rgba(18, 52, 59, .08);
+    transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease;
+    &::after {
+      content: "";
+      position: absolute;
+      right: 18px;
+      bottom: 0;
+      left: 18px;
+      height: 3px;
+      border-radius: 3px 3px 0 0;
+      background: linear-gradient(90deg, var(--sc-brand), var(--showcase-accent));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .3s ease;
+    }
+    &:hover {
+      transform: translateY(-7px);
+      box-shadow: 0 22px 48px rgba(18, 52, 59, .16);
+      &::after { transform: scaleX(1); }
+      .showcase-product-card__image > img { transform: scale(1.055); }
+      .showcase-product-card__image::after { transform: translateX(145%) skewX(-16deg); }
+    }
+  }
+
+  .showcase-product-card__image {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(145deg, #e5ecec, #f7f9f9);
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -35% auto -35% -60%;
+      z-index: 2;
+      width: 38%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.58), transparent);
+      transform: skewX(-16deg);
+      transition: transform .72s cubic-bezier(.2,.7,.2,1);
+      pointer-events: none;
+    }
+    > img { transition: transform .65s cubic-bezier(.2,.7,.2,1); }
+    > span, > em { z-index: 3; }
+  }
+
+  .showcase-product-card__image-fallback {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 8px;
+    aspect-ratio: 25 / 18;
+    color: #718187;
+    svg { width: 30px; height: 30px; }
+    span { font-size: 12px; font-weight: 700; }
+  }
+
+  .showcase-loading-dot {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--sc-line);
+    border-top-color: var(--sc-brand);
+    border-radius: 50%;
+    animation: sc-loading .75s linear infinite;
+  }
+
+  .showcase-empty--error { border-color: #e4c5c5; color: #8b3b3b; }
+  @keyframes sc-loading { to { transform: rotate(360deg); } }
+
+  .showcase-product-card__content { padding: 15px 16px 10px; }
+  .showcase-product-card__actions { padding: 9px 16px 18px; }
+
+  .showcase-product-card__actions .showcase-button {
+    position: relative;
+    overflow: hidden;
+    min-height: 40px;
+    border-radius: 999px;
+    transition: color .25s ease, background .25s ease, border-color .25s ease, transform .2s ease;
+    &:hover { transform: translateY(-2px); }
+  }
+
+  .showcase-button--primary {
+    background: var(--sc-dark);
+    &:hover { background: var(--sc-brand); filter: none; }
+  }
+  .showcase-button--secondary:hover {
+    background: var(--sc-brand);
+    border-color: var(--sc-brand);
+    color: #fff;
+  }
+
+  @media (max-width: 720px) {
+    .showcase-company-banner {
+      min-height: 400px;
+      padding: 30px 24px;
+      background-image:
+        linear-gradient(0deg, rgba(7, 29, 36, .96), rgba(7, 29, 36, .44)),
+        var(--showcase-hero);
+      background-position: 62% center;
+      align-items: flex-end;
+    }
+    .showcase-company-banner__content { width: 100%; }
+    .showcase-company-banner h1 { font-size: clamp(2.1rem, 11vw, 3.5rem); }
+  }
+
+  @media (max-width: 560px) {
+    .showcase-header { padding-inline: 14px; }
+    .showcase-brand small, .showcase-account-trigger span { display: none; }
+    .showcase-account-trigger { width: 40px; padding: 0; }
+    .showcase-company-banner { margin-top: 16px; border-radius: 20px; }
+  }
+}
+
+/* =====================================================================
    Booking calendar + slots (append). Inside .company-showcase.
    ===================================================================== */
 .company-showcase {

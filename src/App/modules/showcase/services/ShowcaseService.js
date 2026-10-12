@@ -70,7 +70,25 @@ export default class ShowcaseService {
   /** Convenience helper: returns just the array of showcase items. */
   async getShowcaseItems(request = {}) {
     const response = await this.getShowcase(request);
-    return response?.result || [];
+    const result = response?.result;
+    if (Array.isArray(result)) return result;
+    return result?.items || result?.products || response?.items || response?.products || [];
+  }
+
+  /** Returns products and any public company metadata supplied by the API. */
+  async getShowcaseData(request = {}) {
+    const response = await this.getShowcase(request);
+    const result = response?.result;
+    const items = Array.isArray(result)
+      ? result
+      : result?.items || result?.products || response?.items || response?.products || [];
+    const company =
+      result?.company ||
+      response?.company ||
+      response?.companyInfo ||
+      (result && !Array.isArray(result) ? result : null);
+
+    return { items, company };
   }
 }
 

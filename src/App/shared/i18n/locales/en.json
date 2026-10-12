@@ -10,7 +10,9 @@
   },
 
   "companyShowcase": {
+    "brandName": "Showcase",
     "publicStore": "Public showcase",
+    "verifiedCompany": "Verified company",
     "companyLink": "/showcase/{{slug}}",
     "search": {
       "label": "Search products",
@@ -21,6 +23,10 @@
       "title": "Products and services",
       "resultCount": "{{count}} available",
       "searchingFor": "Results for “{{search}}”",
+      "loadingTitle": "Loading the showcase",
+      "loadingDescription": "We are collecting the latest products and services.",
+      "errorTitle": "The showcase is temporarily unavailable",
+      "errorDescription": "Please refresh the page or try again in a moment.",
       "emptyTitle": "No products have been found",
       "emptyDescription": "Try another product name or clear the search."
     },
@@ -29,14 +35,25 @@
       "customQuote": "Custom quote"
     },
     "actions": {
+      "explore": "Explore the collection",
       "orderHere": "Order here",
       "contactUs": "Contact us",
       "bookNow": "Book now",
       "close": "Close",
       "cancel": "Cancel"
     },
+    "fallbacks": {
+      "companyName": "Company showcase",
+      "companyDescription": "Discover available products and professional services.",
+      "productName": "Product or service",
+      "productDescription": "Contact the company for more information about this offering.",
+      "category": "General",
+      "code": "No code",
+      "imageUnavailable": "Image coming soon"
+    },
     "contact": {
       "externalChannel": "Continue in an external channel",
+      "notAvailable": "Not available",
       "whatsappMessage": "Hello, I am interested in {{product}} from {{company}}. Product code: {{code}}."
     },
     "pagination": {

@@ -10,7 +10,9 @@
   },
 
   "companyShowcase": {
+    "brandName": "Showcase",
     "publicStore": "Vitrina pública",
+    "verifiedCompany": "Empresa verificada",
     "companyLink": "/showcase/{{slug}}",
     "search": {
       "label": "Buscar productos",
@@ -21,6 +23,10 @@
       "title": "Productos y servicios",
       "resultCount": "{{count}} disponibles",
       "searchingFor": "Resultados para “{{search}}”",
+      "loadingTitle": "Cargando la vitrina",
+      "loadingDescription": "Estamos recopilando los productos y servicios más recientes.",
+      "errorTitle": "La vitrina no está disponible temporalmente",
+      "errorDescription": "Actualice la página o inténtelo de nuevo en un momento.",
       "emptyTitle": "No se encontraron productos",
       "emptyDescription": "Pruebe con otro nombre de producto o limpie la búsqueda."
     },
@@ -29,14 +35,25 @@
       "customQuote": "Cotización personalizada"
     },
     "actions": {
+      "explore": "Explorar el catálogo",
       "orderHere": "Ordenar aquí",
       "contactUs": "Contáctenos",
       "bookNow": "Reservar",
       "close": "Cerrar",
       "cancel": "Cancelar"
     },
+    "fallbacks": {
+      "companyName": "Vitrina de la empresa",
+      "companyDescription": "Descubra productos disponibles y servicios profesionales.",
+      "productName": "Producto o servicio",
+      "productDescription": "Contacte a la empresa para conocer más sobre esta oferta.",
+      "category": "General",
+      "code": "Sin código",
+      "imageUnavailable": "Imagen próximamente"
+    },
     "contact": {
       "externalChannel": "Continuar en un canal externo",
+      "notAvailable": "No disponible",
       "whatsappMessage": "Hola, estoy interesado en {{product}} de {{company}}. Código del producto: {{code}}."
     },
     "pagination": {
