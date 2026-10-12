@@ -1,0 +1,1451 @@
+// =====================================================================
+//  Company showcase — clean, minimalist storefront.
+//  All rules scoped under .company-showcase. Neutral palette (like a
+//  professional catalog); the company brand color is used only as a small
+//  accent via --showcase-brand (set inline by the component).
+//
+//  Preserves ALL functionality: contact menu, cart drawer + checkout,
+//  booking dialog, pagination, notices.
+// =====================================================================
+
+.company-showcase {
+  /* ---- Tokens ---- */
+  --sc-ink: #1c2024;
+  --sc-muted: #6b727a;
+  --sc-line: #e6e8eb;
+  --sc-soft: #f5f6f7;
+  --sc-surface: #ffffff;
+  --sc-page: #fbfbfc;
+  --sc-radius: 12px;
+  /* Brand accent (neutral fallback; company overrides --showcase-brand). */
+  --sc-brand: var(--showcase-brand, #1f2937);
+  --sc-dark: #1f2429; /* dark action button, like the inspiration */
+
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  background: var(--sc-page);
+  color: var(--sc-ink);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+
+  &, *, *::before, *::after { box-sizing: border-box; }
+  h1, h2, h3, p { margin: 0; }
+  h1, h2, h3 { color: inherit; line-height: 1.2; letter-spacing: -0.01em; }
+  a { color: inherit; text-decoration: none; }
+  button, input, select, textarea { font: inherit; }
+  button { color: inherit; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  img { max-width: 100%; display: block; }
+  svg { flex-shrink: 0; }
+
+  /* =================================================================
+     HEADER — logo + search + cart (like the inspiration)
+     ================================================================= */
+  .showcase-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 14px clamp(16px, 3vw, 40px);
+    background: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid var(--sc-line);
+    backdrop-filter: saturate(150%) blur(12px);
+  }
+
+  .showcase-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+
+    > span {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      color: #fff;
+      background: var(--sc-dark);
+      overflow: hidden;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: var(--showcase-logo, none);
+        background-size: cover;
+        background-position: center;
+      }
+      svg { width: 20px; height: 20px; position: relative; z-index: 1; }
+    }
+
+    strong { font-size: 17px; font-weight: 700; line-height: 1.15; }
+    small { color: var(--sc-muted); font-size: 12px; }
+    div { display: flex; flex-direction: column; }
+  }
+
+  /* Search box centered/flexible */
+  .showcase-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    max-width: 640px;
+    margin-inline: auto;
+    padding: 10px 14px;
+    background: var(--sc-soft);
+    border: 1px solid var(--sc-line);
+    border-radius: 999px;
+    color: var(--sc-muted);
+
+    svg { width: 16px; height: 16px; }
+    input {
+      border: 0;
+      outline: 0;
+      background: transparent;
+      width: 100%;
+      color: var(--sc-ink);
+      &::placeholder { color: var(--sc-muted); }
+    }
+  }
+
+  /* Cart button */
+  .showcase-cart-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    background: var(--sc-surface);
+    border: 1px solid var(--sc-line);
+    border-radius: 10px;
+    font-weight: 600;
+
+    &:hover { background: var(--sc-soft); }
+
+    > span {
+      display: grid;
+      place-items: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      background: var(--sc-dark);
+      color: #fff;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+  }
+
+  /* =================================================================
+     BODY + HERO — light gray band (like the inspiration)
+     ================================================================= */
+  .showcase-body {
+    max-width: 1240px;
+    margin-inline: auto;
+    padding: 0 clamp(16px, 3vw, 40px) 56px;
+  }
+
+  .showcase-company-banner {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 24px 0 28px;
+    padding: 40px 36px;
+    background: linear-gradient(180deg, #f2f3f5, #eceef1);
+    border: 1px solid var(--sc-line);
+    border-radius: 16px;
+
+    h1, h2 { font-size: clamp(1.6rem, 3vw, 2.1rem); font-weight: 800; }
+    p { color: var(--sc-muted); max-width: 56ch; font-size: 15px; }
+
+    /* the small check icon + slug pill: keep subtle on the light band */
+    > span:first-child {
+      display: grid;
+      place-items: center;
+      width: 34px; height: 34px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--sc-line);
+      color: var(--sc-brand);
+    }
+    small, a {
+      align-self: flex-start;
+      color: var(--sc-muted);
+      font-size: 12px;
+      background: #fff;
+      border: 1px solid var(--sc-line);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+  }
+
+  /* =================================================================
+     RESULTS + GRID
+     ================================================================= */
+  .showcase-results__heading {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 18px;
+
+    h2 { font-size: 1.35rem; font-weight: 800; }
+    span, small { color: var(--sc-muted); font-size: 13px; }
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  /* ---- Product card ---- */
+  .showcase-product-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--sc-surface);
+    border: 1px solid var(--sc-line);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: box-shadow .18s ease, border-color .18s ease, transform .18s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+      border-color: #d7dade;
+      box-shadow: 0 14px 30px rgba(20, 25, 35, 0.09);
+    }
+  }
+
+  .showcase-product-card__image {
+    width: 100%;
+    aspect-ratio: 4 / 4;
+    object-fit: cover;
+    background: var(--sc-soft);
+  }
+
+  .showcase-product-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px;
+    flex: 1;
+
+    h3 { font-size: 1rem; font-weight: 700; }
+    /* the small code/category line above the title */
+    > span:first-child,
+    small { color: var(--sc-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+    p { color: var(--sc-muted); font-size: 13px; }
+  }
+
+  .showcase-product-card__price {
+    margin-top: 2px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .showcase-product-card__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 12px;
+  }
+
+  /* =================================================================
+     BUTTONS
+     ================================================================= */
+  .showcase-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-weight: 700;
+    transition: background .18s ease, filter .18s ease, transform .12s ease, border-color .18s ease;
+    &:active { transform: translateY(1px); }
+  }
+
+  /* Primary = dark action, like the inspiration's "Add to cart" */
+  .showcase-button--primary {
+    background: var(--sc-dark);
+    color: #fff;
+    &:hover { filter: brightness(1.12); }
+  }
+
+  /* Secondary = outline (Contact us) */
+  .showcase-button--secondary {
+    background: var(--sc-surface);
+    color: var(--sc-ink);
+    border-color: var(--sc-line);
+    &:hover { background: var(--sc-soft); }
+  }
+
+  /* Booking = outline with a subtle accent */
+  .showcase-button--booking {
+    background: var(--sc-surface);
+    color: var(--sc-ink);
+    border-color: var(--sc-line);
+    &:hover { background: var(--sc-soft); border-color: #d7dade; }
+  }
+
+  .showcase-link-button {
+    background: none;
+    border: 0;
+    color: var(--sc-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-size: 13px;
+    padding: 4px;
+    &:hover { color: var(--sc-ink); }
+  }
+
+  /* =================================================================
+     CONTACT MENU (dropdown under "Contact us")
+     ================================================================= */
+  .contact-action { position: relative; }
+
+  .contact-menu {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 10px;
+    background: var(--sc-surface);
+    border: 1px solid var(--sc-line);
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(20, 25, 35, 0.12);
+  }
+
+  .contact-menu a,
+  .contact-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--sc-line);
+    border-radius: 10px;
+    background: var(--sc-surface);
+    transition: border-color .15s ease, background .15s ease;
+
+    &:hover { background: var(--sc-soft); }
+    strong { font-size: .9rem; font-weight: 700; }
+    small { color: var(--sc-muted); font-size: 12px; }
+    span { display: flex; flex-direction: column; }
+  }
+
+  .contact-menu__item--disabled {
+    opacity: .5;
+    filter: grayscale(1);
+    cursor: not-allowed;
+    pointer-events: none;
+    svg { color: #9aa3b0; }
+  }
+
+  /* =================================================================
+     OVERLAYS (cart drawer + booking dialog)
+     ================================================================= */
+  /* NOTE: overlays render inside this component; if your overlay is a portal
+     to <body>, move these rules out of .company-showcase. */
+  .showcase-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: flex-end; /* cart slides from the right */
+  }
+
+  .showcase-overlay--center {
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .showcase-overlay__backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(20, 25, 35, 0.45);
+    backdrop-filter: blur(2px);
+  }
+
+  /* ---- Cart drawer ---- */
+  .showcase-cart {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    width: min(420px, 100%);
+    height: 100%;
+    background: var(--sc-surface);
+    box-shadow: -20px 0 50px rgba(20, 25, 35, 0.2);
+    animation: sc-slide-in .22s ease;
+  }
+
+  @keyframes sc-slide-in {
+    from { transform: translateX(24px); opacity: .6; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .showcase-cart__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+  }
+
+  .showcase-cart__empty {
+    display: grid;
+    place-items: center;
+    gap: 8px;
+    height: 100%;
+    color: var(--sc-muted);
+    text-align: center;
+  }
+
+  .cart-lines { display: grid; gap: 12px; }
+
+  .cart-line__remove {
+    background: none;
+    border: 0;
+    color: var(--sc-muted);
+    padding: 4px;
+    &:hover { color: #c0392b; }
+  }
+
+  .cart-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-top: 1px solid var(--sc-line);
+    font-weight: 800;
+    font-size: 1.05rem;
+  }
+
+  .quantity-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--sc-line);
+    border-radius: 999px;
+    padding: 2px;
+
+    button {
+      display: grid;
+      place-items: center;
+      width: 28px; height: 28px;
+      border: 0;
+      background: var(--sc-soft);
+      border-radius: 999px;
+      &:hover { background: #e9ebed; }
+    }
+    span { min-width: 22px; text-align: center; font-weight: 700; }
+  }
+
+  .checkout-choice {
+    display: grid;
+    gap: 10px;
+    padding: 16px 18px;
+    border-top: 1px solid var(--sc-line);
+  }
+
+  .mock-auth-note {
+    color: var(--sc-muted);
+    font-size: 12px;
+    text-align: center;
+  }
+
+  /* ---- Booking dialog (centered) ---- */
+  .booking-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(560px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--sc-surface);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(20, 25, 35, 0.3);
+    animation: sc-pop .18s ease;
+  }
+
+  @keyframes sc-pop {
+    from { transform: scale(.97); opacity: .7; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .booking-dialog__body { padding: 20px; display: grid; gap: 16px; }
+  .booking-dialog__intro { color: var(--sc-muted); }
+
+  .booking-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .booking-form-grid__full { grid-column: 1 / -1; }
+
+  /* =================================================================
+     FORMS (guest / account / booking fields)
+     ================================================================= */
+  .showcase-form { display: grid; gap: 14px; padding: 18px; }
+  .showcase-form__heading { font-size: 1.1rem; font-weight: 800; }
+
+  .showcase-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--sc-surface);
+    border: 1px solid var(--sc-line);
+    border-radius: 10px;
+
+    svg { color: var(--sc-muted); width: 16px; height: 16px; }
+    input, textarea, select {
+      border: 0;
+      outline: 0;
+      background: transparent;
+      width: 100%;
+      color: var(--sc-ink);
+    }
+  }
+
+  label { display: grid; gap: 6px; font-size: 13px; font-weight: 600; }
+  label > span { color: var(--sc-ink); }
+  label select, label textarea, label input {
+    padding: 10px 12px;
+    background: var(--sc-surface);
+    border: 1px solid var(--sc-line);
+    border-radius: 10px;
+    color: var(--sc-ink);
+    outline: 0;
+    &:focus { border-color: var(--sc-brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sc-brand) 15%, transparent); }
+  }
+
+  /* =================================================================
+     PAGINATION + NOTICE + EMPTY
+     ================================================================= */
+  .showcase-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 32px;
+
+    button {
+      min-width: 38px;
+      height: 38px;
+      padding: 0 12px;
+      background: var(--sc-surface);
+      border: 1px solid var(--sc-line);
+      border-radius: 10px;
+      font-weight: 700;
+      &:hover:not(:disabled) { background: var(--sc-soft); }
+      &[aria-current="true"], &.is-active {
+        background: var(--sc-dark);
+        color: #fff;
+        border-color: var(--sc-dark);
+      }
+    }
+  }
+
+  .showcase-notice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0;
+    padding: 12px 16px;
+    background: #eef7f0;
+    border: 1px solid #cfe8d6;
+    color: #1f7a44;
+    border-radius: 12px;
+
+    button { margin-left: auto; background: none; border: 0; color: inherit; }
+  }
+
+  .showcase-empty {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--sc-muted);
+    background: var(--sc-surface);
+    border: 1px dashed #d3d7db;
+    border-radius: 16px;
+  }
+
+  /* =================================================================
+     NOT FOUND
+     ================================================================= */
+  &.company-showcase--not-found {
+    display: grid;
+    place-items: center;
+    min-height: 60vh;
+    text-align: center;
+    color: var(--sc-muted);
+  }
+
+  /* =================================================================
+     RESPONSIVE
+     ================================================================= */
+  @media (max-width: 860px) {
+    .showcase-header { flex-wrap: wrap; gap: 12px; }
+    .showcase-search { order: 3; max-width: none; flex-basis: 100%; margin-inline: 0; }
+    .booking-form-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 560px) {
+    .product-grid { grid-template-columns: 1fr; }
+    .showcase-company-banner { padding: 28px 20px; }
+    .showcase-cart { width: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+}
+
+/* =====================================================================
+   REFINEMENTS (round 2): wider content, CTA contact button as floating
+   pop-up, polished booking dialog, richer header band.
+   ===================================================================== */
+.company-showcase {
+
+  /* 1) Wider product area — use the empty side columns. */
+  .showcase-body { max-width: 1600px; }
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 22px; }
+
+  /* 4) Header: richer, with a soft brand-tinted band behind it. */
+  .showcase-header {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--sc-brand) 6%, #ffffff),
+        rgba(255, 255, 255, 0.9)
+      );
+  }
+
+  /* 4b) Company banner: a more impactful gradient + optional image hook.
+        Set --showcase-hero: url(<img>) inline to use a background image. */
+  .showcase-company-banner {
+    color: #fff;
+    border: none;
+    background-image:
+      linear-gradient(
+        130deg,
+        color-mix(in srgb, var(--sc-brand) 92%, #10141a),
+        color-mix(in srgb, var(--showcase-accent, #b5763a) 55%, var(--sc-brand))
+      ),
+      var(--showcase-hero, none);
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 18px 40px color-mix(in srgb, var(--sc-brand) 20%, transparent);
+
+    h1, h2 { color: #fff; }
+    p { color: rgba(255, 255, 255, 0.92); }
+    > span:first-child {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+    small, a {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.28);
+      color: #fff;
+    }
+  }
+
+  /* 2) Contact us as a stronger call-to-action (colored, not plain outline). */
+  .showcase-button--secondary {
+    background: color-mix(in srgb, var(--sc-brand) 10%, #ffffff);
+    color: color-mix(in srgb, var(--sc-brand) 75%, #10141a);
+    border-color: color-mix(in srgb, var(--sc-brand) 30%, var(--sc-line));
+    font-weight: 700;
+    &:hover {
+      background: color-mix(in srgb, var(--sc-brand) 16%, #ffffff);
+      border-color: color-mix(in srgb, var(--sc-brand) 45%, var(--sc-line));
+    }
+  }
+
+  /* 2b) Contact menu as a FLOATING pop-up over the product (not in flow). */
+  .contact-action { position: relative; }
+  .contact-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(100% + 8px);   /* floats ABOVE the button */
+    z-index: 40;
+    margin-top: 0;
+    box-shadow: 0 18px 40px rgba(20, 25, 35, 0.22);
+  }
+  /* little arrow pointing down to the button */
+  .contact-menu::after {
+    content: "";
+    position: absolute;
+    left: 24px;
+    bottom: -7px;
+    width: 14px; height: 14px;
+    background: var(--sc-surface);
+    border-right: 1px solid var(--sc-line);
+    border-bottom: 1px solid var(--sc-line);
+    transform: rotate(45deg);
+  }
+
+  /* 3) Polished booking dialog. */
+  .booking-dialog {
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--sc-line);
+
+      > div { display: flex; align-items: center; gap: 12px; }
+      span {
+        display: grid; place-items: center;
+        width: 40px; height: 40px;
+        border-radius: 11px;
+        background: color-mix(in srgb, var(--sc-brand) 12%, #fff);
+        color: var(--sc-brand);
+      }
+      p { color: var(--sc-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+      h2 { font-size: 1.2rem; font-weight: 800; }
+      > button {
+        display: grid; place-items: center;
+        width: 34px; height: 34px;
+        border: 1px solid var(--sc-line);
+        background: var(--sc-surface);
+        border-radius: 9px;
+        color: var(--sc-muted);
+        &:hover { background: var(--sc-soft); color: var(--sc-ink); }
+      }
+    }
+
+    footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 16px 20px;
+      border-top: 1px solid var(--sc-line);
+      background: var(--sc-soft);
+
+      .showcase-button { width: auto; min-width: 120px; }
+    }
+  }
+
+  /* Make ALL dialog/form fields consistent and well-sized. */
+  .booking-dialog label,
+  .showcase-form label {
+    display: grid;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+
+    span { color: var(--sc-ink); }
+
+    input, textarea, select {
+      width: 100%;
+      min-height: 44px;
+      padding: 11px 13px;
+      background: var(--sc-surface);
+      border: 1px solid var(--sc-line);
+      border-radius: 10px;
+      color: var(--sc-ink);
+      outline: 0;
+      transition: border-color .15s ease, box-shadow .15s ease;
+
+      &:focus {
+        border-color: var(--sc-brand);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--sc-brand) 15%, transparent);
+      }
+    }
+    textarea { min-height: 96px; resize: vertical; }
+  }
+
+  @media (max-width: 560px) {
+    .contact-menu { position: static; box-shadow: none; &::after { display: none; } }
+    .booking-dialog footer { flex-direction: column-reverse; .showcase-button { width: 100%; } }
+  }
+}
+
+/* =====================================================================
+   REFINEMENTS (round 3): polished guest/checkout form inside the cart.
+   Each field is: <label><span>..</span><div.showcase-field><icon><input></div></label>
+   ===================================================================== */
+.company-showcase {
+
+  /* The guest/account form lives in the cart body; give it clean spacing. */
+  .showcase-form {
+    display: grid;
+    gap: 16px;
+    padding: 18px;
+  }
+
+  .showcase-form__heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2px;
+
+    > button {
+      display: grid; place-items: center;
+      width: 36px; height: 36px;
+      flex: 0 0 36px;
+      border: 1px solid var(--sc-line);
+      background: var(--sc-surface);
+      border-radius: 9px;
+      color: var(--sc-muted);
+      &:hover { background: var(--sc-soft); color: var(--sc-ink); }
+    }
+    h3 { font-size: 1.1rem; font-weight: 800; }
+    p { color: var(--sc-muted); font-size: 13px; }
+  }
+
+  /* A field row: label text on top, the input box below. */
+  .showcase-form label {
+    display: grid;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    span { color: var(--sc-ink); }
+  }
+
+  /* The icon + input box. This is the key fix: make it ONE tidy control,
+     with the icon inside and the input filling the rest. */
+  .showcase-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 46px;
+    padding: 0 12px;
+    background: var(--sc-surface);
+    border: 1px solid var(--sc-line);
+    border-radius: 10px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+
+    > svg {
+      width: 16px; height: 16px;
+      color: var(--sc-muted);
+      flex: 0 0 16px;
+    }
+
+    input,
+    textarea,
+    select {
+      flex: 1;
+      width: 100%;
+      min-height: 44px;
+      border: 0 !important;
+      outline: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;         /* the padding is on .showcase-field */
+      color: var(--sc-ink);
+      &:focus { box-shadow: none !important; }
+      &::placeholder { color: var(--sc-muted); }
+    }
+
+    /* focus ring on the whole field when the inner input is focused */
+    &:focus-within {
+      border-color: var(--sc-brand);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--sc-brand) 15%, transparent);
+    }
+  }
+
+  /* Plain selects/textareas that are NOT inside a .showcase-field
+     (e.g. the "Preferred contact method" select and Notes textarea). */
+  .showcase-form > label > select,
+  .showcase-form > label > textarea {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 13px;
+    background: var(--sc-surface);
+    border: 1px solid var(--sc-line);
+    border-radius: 10px;
+    color: var(--sc-ink);
+    outline: 0;
+    &:focus {
+      border-color: var(--sc-brand);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--sc-brand) 15%, transparent);
+    }
+  }
+  .showcase-form > label > textarea { min-height: 92px; resize: vertical; }
+
+  /* Cart header: keep it clean and not overlapping. */
+  .showcase-cart {
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--sc-line);
+
+      h2 { font-size: 1.15rem; font-weight: 800; }
+      p, small { color: var(--sc-muted); font-size: 13px; }
+      button {
+        display: grid; place-items: center;
+        width: 34px; height: 34px;
+        border: 1px solid var(--sc-line);
+        background: var(--sc-surface);
+        border-radius: 9px;
+        color: var(--sc-muted);
+        &:hover { background: var(--sc-soft); color: var(--sc-ink); }
+      }
+    }
+  }
+
+  /* The submit button inside the form spans full width, primary/dark. */
+  .showcase-form .showcase-button { width: 100%; }
+
+  /* Optional current location, immediately below the guest's written address. */
+  .guest-location {
+    min-width: 0;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid var(--sc-line);
+    border-radius: 10px;
+    background: var(--sc-soft);
+
+    legend {
+      padding: 0 5px;
+      color: var(--sc-ink);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--sc-brand);
+      outline-offset: 3px;
+    }
+  }
+
+  .guest-location__help {
+    margin-bottom: 10px;
+    color: var(--sc-muted);
+    font-size: 12px;
+  }
+
+  .guest-location__status {
+    color: var(--sc-muted);
+    font-size: 12px;
+    &:not(:empty) { margin-top: 10px; }
+  }
+
+  .guest-location__selection {
+    strong {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--sc-ink);
+    }
+
+    dl { display: grid; gap: 4px; margin: 6px 0; }
+    dl > div { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+    dt { flex: 1 1 auto; }
+    dd { margin: 0; color: var(--sc-ink); font-variant-numeric: tabular-nums; }
+  }
+
+  .guest-location__error {
+    margin-top: 10px;
+    color: #a4262c;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .guest-location__clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    margin-top: 8px;
+    padding: 6px 8px;
+    border: 1px solid var(--sc-line);
+    border-radius: 8px;
+    background: var(--sc-surface);
+    font-size: 12px;
+    &:hover { background: var(--sc-soft); }
+  }
+}
+/* =====================================================================
+   Location confirmation map. The native dialog is above the cart drawer.
+   ===================================================================== */
+.company-showcase.guest-location-dialog {
+  width: min(760px, calc(100% - 28px));
+  max-width: none;
+  min-height: 0;
+  max-height: calc(100vh - 28px);
+  max-height: calc(100dvh - 28px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--sc-line);
+  border-radius: 16px;
+  background: var(--sc-surface);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 28%);
+
+  &::backdrop { background: rgb(16 24 40 / 55%); }
+
+  button:focus-visible {
+    outline: 2px solid var(--sc-brand);
+    outline-offset: 3px;
+  }
+
+  .guest-location-dialog__content { display: grid; gap: 12px; padding: 18px; }
+
+  .guest-location-dialog__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    h2 { font-size: 1.15rem; }
+  }
+
+  .guest-location-dialog__close {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border: 1px solid var(--sc-line);
+    border-radius: 9px;
+    background: var(--sc-surface);
+    &:hover { background: var(--sc-soft); }
+  }
+
+  .guest-location-dialog__help { color: var(--sc-muted); font-size: 13px; }
+  .guest-location-dialog__map-wrap { position: relative; min-width: 0; }
+
+  .guest-location-dialog__map {
+    width: 100%;
+    height: clamp(240px, 44vh, 400px);
+    border: 1px solid var(--sc-line);
+    border-radius: 10px;
+    background: #e8edf0;
+    z-index: 0;
+
+    &:focus-visible { outline: 2px solid var(--sc-brand); outline-offset: 2px; }
+    .leaflet-control-attribution { font-size: 11px; }
+    .leaflet-control-attribution a { color: #16639b; text-decoration: underline; }
+  }
+
+  .guest-location-dialog__crosshair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+
+    &::before, &::after {
+      content: "";
+      position: absolute;
+      background: #1f2937;
+      box-shadow: 0 0 0 1px #fff;
+    }
+    &::before { top: 7px; left: 0; width: 16px; height: 2px; }
+    &::after { top: 0; left: 7px; width: 2px; height: 16px; }
+  }
+
+  .guest-location-pin {
+    background: transparent;
+    border: 0;
+
+    > span {
+      position: absolute;
+      left: 1px;
+      top: 5px;
+      width: 30px;
+      height: 30px;
+      border: 3px solid #fff;
+      border-radius: 50% 50% 50% 0;
+      background: #3459e6;
+      box-shadow: 0 2px 7px rgb(0 0 0 / 35%);
+      transform: rotate(-45deg);
+
+      &::after {
+        content: "";
+        position: absolute;
+        inset: 7px;
+        border-radius: 50%;
+        background: #fff;
+      }
+    }
+  }
+
+  .guest-location-dialog__tools,
+  .guest-location-dialog__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .guest-location-dialog__tools .showcase-button { font-size: 13px; padding: 10px; }
+  .guest-location-dialog__selection { color: var(--sc-muted); font-size: 13px; }
+  .guest-location-dialog__actions { padding-top: 12px; border-top: 1px solid var(--sc-line); }
+}
+
+@media (max-width: 480px) {
+  .company-showcase.guest-location-dialog {
+    .guest-location-dialog__content { padding: 12px; }
+    .guest-location-dialog__tools { grid-template-columns: minmax(0, 1fr); }
+    .guest-location-dialog__map { height: 32vh; min-height: 220px; }
+    .guest-location-dialog__actions .showcase-button { padding: 10px 8px; font-size: 13px; }
+  }
+}
+
+/* =====================================================================
+   Booking calendar + slots (append). Inside .company-showcase.
+   ===================================================================== */
+.company-showcase {
+
+  .booking-field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sc-ink, #1c2024);
+    margin-bottom: 8px;
+  }
+
+  .booking-calendar-block { display: grid; gap: 18px; }
+
+  .booking-calendar {
+    border: 1px solid var(--sc-line, #e6e8eb);
+    border-radius: 12px;
+    padding: 12px;
+    background: var(--sc-surface, #fff);
+  }
+
+  .booking-calendar__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+
+    strong { font-weight: 700; text-transform: capitalize; }
+    button {
+      display: grid; place-items: center;
+      width: 32px; height: 32px;
+      border: 1px solid var(--sc-line, #e6e8eb);
+      background: var(--sc-surface, #fff);
+      border-radius: 8px;
+      color: var(--sc-muted, #6b727a);
+      &:hover { background: var(--sc-soft, #f5f6f7); color: var(--sc-ink, #1c2024); }
+    }
+  }
+
+  .booking-calendar__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .booking-calendar__weekday {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--sc-muted, #6b727a);
+    padding: 4px 0;
+  }
+
+  .booking-calendar__day {
+    aspect-ratio: 1 / 1;
+    display: grid;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: var(--sc-soft, #f5f6f7);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--sc-ink, #1c2024);
+    transition: background .12s ease, border-color .12s ease;
+
+    &:hover:not(:disabled) {
+      border-color: color-mix(in srgb, var(--sc-brand, #1f2937) 40%, var(--sc-line, #e6e8eb));
+    }
+    &.is-selected {
+      background: var(--sc-dark, #1f2429);
+      color: #fff;
+      border-color: var(--sc-dark, #1f2429);
+    }
+    &.is-past { opacity: .35; cursor: not-allowed; }
+  }
+
+  .booking-slots { margin-top: 4px; }
+
+  .booking-slots__hint {
+    color: var(--sc-muted, #6b727a);
+    font-size: 13px;
+    padding: 8px 0;
+    &--error { color: #b3261e; }
+  }
+
+  .booking-slots__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+
+  .booking-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 1px solid var(--sc-line, #e6e8eb);
+    border-radius: 10px;
+    background: var(--sc-surface, #fff);
+    text-align: left;
+    transition: border-color .12s ease, background .12s ease;
+
+    span { font-weight: 700; font-size: 13px; }
+    small { color: var(--sc-muted, #6b727a); font-size: 11px; }
+
+    &:hover {
+      border-color: color-mix(in srgb, var(--sc-brand, #1f2937) 40%, var(--sc-line, #e6e8eb));
+    }
+    &.is-selected {
+      background: color-mix(in srgb, var(--sc-brand, #1f2937) 10%, #fff);
+      border-color: var(--sc-brand, #1f2937);
+    }
+  }
+}
+/* =====================================================================
+   PRODUCT CARD SIZING (final override). 25% wider minimum width and
+   approximately 10% shorter cards; content can still grow without clipping.
+   ===================================================================== */
+.company-showcase {
+  .product-grid {
+    /* 190px * 1.25 = 237.5px. Fit the viewport on narrow screens. */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 237.5px), 1fr));
+    gap: 16px;
+  }
+
+  .showcase-product-card__image {
+    /* Size the actual image; keep the category and booking labels visible. */
+    aspect-ratio: auto;
+
+    > img {
+      width: 100%;
+      height: auto;
+      /* At 1.25x the width, this gives 0.9x the former square image height. */
+      aspect-ratio: 25 / 18;
+      object-fit: cover;
+    }
+  }
+
+  .showcase-product-card__content {
+    gap: 3.6px;
+    padding: 10.8px 12px;
+
+    h3 { font-size: 0.92rem; line-height: 1.25; }
+    p {
+      font-size: 12px;
+      /* Clamp the description to 2 lines so cards stay even and short. */
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+
+  .showcase-product-card__price {
+    font-size: 1.02rem;
+    margin-top: 0;
+  }
+
+  .showcase-product-card__actions {
+    gap: 5.4px;
+    padding-top: 7.2px;
+  }
+
+  /* Compact buttons inside the card. */
+  .showcase-product-card__actions .showcase-button {
+    min-height: 34.2px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .company-showcase .product-grid {
+    /* Give wider cards one column on phones without horizontal scrolling. */
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+}
+
+/* =====================================================================
+   Delivery checkbox + pickup note (guest checkout). Append.
+   ===================================================================== */
+.company-showcase {
+  .showcase-delivery-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0 6px;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      width: 18px;
+      min-width: 18px;
+      height: 18px;
+      margin: 0;
+      flex: 0 0 auto;
+      accent-color: var(--sc-brand, #2f4bd8);
+      cursor: pointer;
+    }
+    span { font-size: 13px; font-weight: 650; }
+  }
+
+  .showcase-pickup-note {
+    margin: 0 0 6px;
+    padding: 12px 14px;
+    background: var(--sc-soft, #f5f6f7);
+    border: 1px solid var(--sc-line, #e6e8eb);
+    border-radius: 10px;
+    color: var(--sc-muted, #6b727a);
+    font-size: 13px;
+  }
+}
+/* Header account preview and sign-in / registration modal. */
+.company-showcase {
+  .showcase-header-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; margin-left: auto; }
+  .showcase-account-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    max-width: 150px;
+    padding: 8px 12px;
+    border: 1px solid var(--sc-line);
+    border-radius: 10px;
+    background: var(--sc-surface);
+    font-size: 13px;
+    font-weight: 600;
+
+    svg { width: 17px; height: 17px; }
+    span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    &:hover { background: var(--sc-soft); border-color: var(--sc-brand); }
+    &:focus-visible { outline: 2px solid var(--sc-brand); outline-offset: 3px; }
+    &.is-signed-in { color: var(--sc-brand); background: color-mix(in srgb, var(--sc-brand) 7%, white); }
+  }
+}
+
+.company-showcase.showcase-auth-dialog {
+  --auth-blue: #2563eb;
+  width: min(430px, calc(100% - 28px));
+  max-width: none;
+  min-height: 0;
+  max-height: calc(100vh - 28px);
+  max-height: calc(100dvh - 28px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #e2e5eb;
+  border-radius: 24px;
+  background: #fff;
+  color: #141b2b;
+  box-shadow: 0 24px 80px rgb(16 24 40 / 18%);
+  &::backdrop { background: rgb(16 24 40 / 40%); }
+  button:focus-visible { outline: 2px solid var(--auth-blue); outline-offset: 3px; }
+
+  .showcase-auth__body { display: grid; gap: 24px; padding: 36px; }
+  .showcase-auth__heading {
+    position: relative;
+    padding-right: 10px;
+    h2 { margin: 0 0 10px; font-size: 30px; font-weight: 800; }
+    p { color: #6b758a; font-size: 14px; line-height: 1.5; }
+  }
+  .showcase-auth__close {
+    position: absolute; top: -24px; right: -24px;
+    display: grid; place-items: center;
+    width: 32px; height: 32px;
+    border: 0; border-radius: 50%;
+    background: transparent; color: #6b758a;
+    &:hover { background: #f0f3f8; }
+  }
+  .showcase-form.showcase-auth__form {
+    padding: 4px 0 0; gap: 16px;
+    label { display: grid; gap: 7px; font-size: 14px; font-weight: 600; }
+    label > span { color: #374151; }
+    input {
+      width: 100%; min-width: 0; height: 52px; padding: 12px 15px;
+      border: 1px solid #d0d5df; border-radius: 12px;
+      background: #eaf1ff; color: #141b2b; font: inherit; font-weight: 400;
+      &:focus { outline: 2px solid var(--auth-blue); outline-offset: 2px; }
+      &::placeholder { color: #727d91; }
+    }
+  }
+  .showcase-auth__submit {
+    width: 100%; min-height: 54px; padding: 12px 16px;
+    border: 0; border-radius: 12px;
+    background: var(--auth-blue); color: #fff; font-size: 15px; font-weight: 750;
+    &:hover { background: #1d4ed8; }
+  }
+  .showcase-auth__hint { margin-top: -8px; color: #6b758a; font-size: 12px; }
+  .showcase-auth__error { color: #a4262c; font-size: 13px; }
+  .showcase-auth__divider {
+    display: flex; align-items: center; gap: 16px;
+    color: #778297; font-size: 12px;
+    &::before, &::after { content: ""; height: 1px; flex: 1; background: #e0e4ec; }
+  }
+  .showcase-auth__providers {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
+    button {
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      min-width: 0; min-height: 51px; padding: 10px 8px;
+      border: 1px solid #d0d5df; border-radius: 12px;
+      background: #fff; color: #374151; font-size: 14px; font-weight: 650;
+      svg { flex: 0 0 16px; width: 16px; height: 16px; }
+      &:hover { background: #f3f6fc; border-color: #9ba9c1; }
+    }
+  }
+  .showcase-auth__switch {
+    text-align: center; color: #6b758a; font-size: 14px;
+    button { padding: 3px 0; border: 0; background: transparent; color: var(--auth-blue); font-weight: 750; }
+  }
+  .showcase-auth__demo { margin-top: -12px; text-align: center; color: #6b758a; font-size: 11px; line-height: 1.5; }
+  .showcase-auth__profile { display: grid; gap: 16px; overflow-wrap: anywhere; }
+  .showcase-auth__profile p { color: #6b758a; font-size: 13px; }
+  .showcase-auth__badge { display: inline-flex; align-items: center; gap: 7px; justify-self: start; padding: 5px 9px; border-radius: 20px; background: #eaf5ef; color: #256342; font-size: 12px; }
+}
+
+.company-showcase {
+  .showcase-account-email { overflow-wrap: anywhere; }
+  .showcase-account-items {
+    display: grid; gap: 10px; margin: 0; padding: 0; list-style: none;
+    li { display: flex; justify-content: space-between; gap: 12px; }
+    li > span { min-width: 0; overflow-wrap: anywhere; }
+    strong { flex-shrink: 0; }
+  }
+}
+
+@media (max-width: 860px) {
+  .company-showcase .showcase-header {
+    .showcase-brand { flex: 1 1 0; }
+    .showcase-brand > span { flex-shrink: 0; }
+    .showcase-brand > div { min-width: 0; }
+    .showcase-brand strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .showcase-account-trigger { max-width: 125px; padding: 8px 10px; }
+  }
+}
+@media (max-width: 480px) {
+  .company-showcase.showcase-auth-dialog {
+    .showcase-auth__body { padding: 28px 20px; gap: 20px; }
+    .showcase-auth__close { top: -18px; right: -12px; }
+    .showcase-auth__providers button { gap: 6px; font-size: 13px; }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "showcaseApp": {
+    "languages": {
+      "en": "English",
+      "es": "Spanish"
+    },
+    "messages": {
+      "languageChanged": "The language has been changed."
+    }
+  },
+
+  "companyShowcase": {
+    "publicStore": "Public showcase",
+    "companyLink": "/showcase/{{slug}}",
+    "search": {
+      "label": "Search products",
+      "placeholder": "Search products by name",
+      "clear": "Clear product search"
+    },
+    "products": {
+      "title": "Products and services",
+      "resultCount": "{{count}} available",
+      "searchingFor": "Results for “{{search}}”",
+      "emptyTitle": "No products have been found",
+      "emptyDescription": "Try another product name or clear the search."
+    },
+    "product": {
+      "bookingAvailable": "Booking available",
+      "customQuote": "Custom quote"
+    },
+    "actions": {
+      "orderHere": "Order here",
+      "contactUs": "Contact us",
+      "bookNow": "Book now",
+      "close": "Close",
+      "cancel": "Cancel"
+    },
+    "contact": {
+      "externalChannel": "Continue in an external channel",
+      "whatsappMessage": "Hello, I am interested in {{product}} from {{company}}. Product code: {{code}}."
+    },
+    "pagination": {
+      "label": "Product pages",
+      "summary": "Showing {{start}}–{{end}} of {{total}}",
+      "previous": "Previous page",
+      "next": "Next page"
+    },
+    "cart": {
+      "open": "Open shopping cart",
+      "title": "Your cart",
+      "itemCount": "{{count}} items",
+      "emptyTitle": "Your cart is empty",
+      "emptyDescription": "Add a product from the showcase to begin an order.",
+      "remove": "Remove {{product}} from the cart",
+      "subtotal": "Subtotal",
+      "checkoutDescription": "Shipping, taxes, and final availability will be confirmed with the company."
+    },
+    "checkout": {
+      "signIn": "Sign in or create account",
+      "continueAsGuest": "Continue as guest",
+      "guestTitle": "Guest order",
+      "guestDescription": "Provide your contact information so the company can confirm the order.",
+      "accountTitle": "Sign in to place the order",
+      "accountDescription": "Your order will be connected to your account and available for tracking.",
+      "mockAuthentication": "Mock authentication: replace this form with the platform login or registration flow.",
+      "submitGuestOrder": "Submit guest order",
+      "signInAndOrder": "Sign in and submit order",
+      "createAccount": "Create a new account",
+      "member": "Member",
+      "guestType": "guest",
+      "memberType": "member"
+    },
+    "booking": {
+      "title": "Request a booking",
+      "description": "No account is required. Enter your contact information and preferred schedule; the company will confirm availability.",
+      "preferredDate": "Preferred date",
+      "preferredTime": "Preferred time",
+      "notesPlaceholder": "Describe what you need for this service",
+      "submit": "Submit booking request"
+    },
+    "form": {
+      "name": "Full name",
+      "phone": "Phone number",
+      "email": "Email address",
+      "password": "Password",
+      "address": "Delivery address",
+      "preferredContact": "Preferred contact method",
+      "emailOption": "Email",
+      "phoneOption": "Phone call",
+      "notes": "Notes",
+      "notesPlaceholder": "Add measurements, personalization details, or delivery instructions"
+    },
+    "messages": {
+      "addedToCart": "{{product}} has been added to your cart.",
+      "orderCreated": "Order {{reference}} has been created for {{name}} as a {{customerType}} order.",
+      "bookingCreated": "Booking request {{reference}} has been created for {{service}}."
+    },
+    "notFound": {
+      "title": "Company showcase not found",
+      "description": "No public company has been found for “{{slug}}”. Check the company link and try again."
+    }
+  }
+}

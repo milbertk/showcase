@@ -1,0 +1,103 @@
+{
+  "showcaseApp": {
+    "languages": {
+      "en": "English",
+      "es": "Spanish"
+    },
+    "messages": {
+      "languageChanged": "The language has been changed."
+    }
+  },
+
+  "companyShowcase": {
+    "publicStore": "Vitrina pública",
+    "companyLink": "/showcase/{{slug}}",
+    "search": {
+      "label": "Buscar productos",
+      "placeholder": "Buscar productos por nombre",
+      "clear": "Limpiar búsqueda de productos"
+    },
+    "products": {
+      "title": "Productos y servicios",
+      "resultCount": "{{count}} disponibles",
+      "searchingFor": "Resultados para “{{search}}”",
+      "emptyTitle": "No se encontraron productos",
+      "emptyDescription": "Pruebe con otro nombre de producto o limpie la búsqueda."
+    },
+    "product": {
+      "bookingAvailable": "Reserva disponible",
+      "customQuote": "Cotización personalizada"
+    },
+    "actions": {
+      "orderHere": "Ordenar aquí",
+      "contactUs": "Contáctenos",
+      "bookNow": "Reservar",
+      "close": "Cerrar",
+      "cancel": "Cancelar"
+    },
+    "contact": {
+      "externalChannel": "Continuar en un canal externo",
+      "whatsappMessage": "Hola, estoy interesado en {{product}} de {{company}}. Código del producto: {{code}}."
+    },
+    "pagination": {
+      "label": "Páginas de productos",
+      "summary": "Mostrando {{start}}–{{end}} de {{total}}",
+      "previous": "Página anterior",
+      "next": "Página siguiente"
+    },
+    "cart": {
+      "open": "Abrir carrito de compras",
+      "title": "Su carrito",
+      "itemCount": "{{count}} artículos",
+      "emptyTitle": "Su carrito está vacío",
+      "emptyDescription": "Agregue un producto de la vitrina para comenzar una orden.",
+      "remove": "Eliminar {{product}} del carrito",
+      "subtotal": "Subtotal",
+      "checkoutDescription": "El envío, los impuestos y la disponibilidad final serán confirmados con la empresa."
+    },
+    "checkout": {
+      "signIn": "Iniciar sesión o crear una cuenta",
+      "continueAsGuest": "Continuar como invitado",
+      "guestTitle": "Orden como invitado",
+      "guestDescription": "Ingrese su información de contacto para que la empresa pueda confirmar la orden.",
+      "accountTitle": "Inicie sesión para realizar la orden",
+      "accountDescription": "La orden quedará asociada con su cuenta y estará disponible para seguimiento.",
+      "mockAuthentication": "Autenticación simulada: reemplace este formulario con el inicio de sesión o registro de la plataforma.",
+      "submitGuestOrder": "Enviar orden como invitado",
+      "signInAndOrder": "Iniciar sesión y enviar orden",
+      "createAccount": "Crear una cuenta nueva",
+      "member": "Miembro",
+      "guestType": "invitado",
+      "memberType": "miembro"
+    },
+    "booking": {
+      "title": "Solicitar una reserva",
+      "description": "No se requiere una cuenta. Ingrese su información de contacto y horario preferido; la empresa confirmará la disponibilidad.",
+      "preferredDate": "Fecha preferida",
+      "preferredTime": "Hora preferida",
+      "notesPlaceholder": "Describa lo que necesita para este servicio",
+      "submit": "Enviar solicitud de reserva"
+    },
+    "form": {
+      "name": "Nombre completo",
+      "phone": "Número de teléfono",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "address": "Dirección de entrega",
+      "preferredContact": "Medio de contacto preferido",
+      "emailOption": "Correo electrónico",
+      "phoneOption": "Llamada telefónica",
+      "notes": "Notas",
+      "notesPlaceholder": "Agregue medidas, detalles de personalización o instrucciones de entrega"
+    },
+    "messages": {
+      "addedToCart": "{{product}} se ha agregado al carrito.",
+      "orderCreated": "La orden {{reference}} se ha creado para {{name}} como una orden de {{customerType}}.",
+      "bookingCreated": "La solicitud de reserva {{reference}} se ha creado para {{service}}."
+    },
+    "notFound": {
+      "title": "No se encontró la vitrina de la empresa",
+      "description": "No se encontró una empresa pública para “{{slug}}”. Revise el enlace de la empresa e inténtelo nuevamente."
+    }
+  }
+}
