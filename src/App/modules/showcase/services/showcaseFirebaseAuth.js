@@ -3,6 +3,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  sendPasswordResetEmail,
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
@@ -44,6 +45,12 @@ export async function firebaseSocialLogin(providerId) {
   await setPersistence(auth, browserLocalPersistence);
   const cred = await signInWithPopup(auth, provider);
   return { user: cred.user, idToken: await cred.user.getIdToken() };
+}
+
+// Send the Firebase "reset your password" email. Firebase does not tell us
+// whether the email exists (good: nobody can test which emails are registered).
+export async function firebasePasswordReset(email) {
+  await sendPasswordResetEmail(auth, email);
 }
 
 // Sign out from Firebase on the client.

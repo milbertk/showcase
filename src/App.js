@@ -1,5 +1,8 @@
 import "./App.css";
 import "./App/shared/i18n/i18n";
+// Light / dark mode (2026-10-24): applied before the first render.
+import "./App/shared/Hooks/useTheme";
+import "./App/shared/Styles/DarkTheme.scss";
 
 import {
   createContext,

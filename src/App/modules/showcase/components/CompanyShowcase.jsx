@@ -1,33 +1,42 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 // Install once in the frontend project: npm install leaflet@1.9.4
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { HiShoppingCart } from "react-icons/hi";
 import {
-  FaApple,
   FaGoogle,
-  FaFacebookF,
-  FaMicrosoft,
   FaArrowLeft,
   FaArrowRight,
+  FaArrowUp,
   FaCalendarCheck,
   FaCartPlus,
   FaCartShopping,
   FaCheck,
   FaChevronDown,
   FaCircleUser,
+  FaClock,
+  FaApple,
   FaEnvelope,
+  FaFacebookF,
   FaFacebookMessenger,
   FaLink,
+  FaInstagram,
+  FaTiktok,
+  FaListCheck,
   FaLocationDot,
+  FaMoneyBillWave,
   FaImage,
   FaMagnifyingGlass,
+  FaMicrosoft,
   FaMinus,
+  FaMoon,
   FaPhone,
   FaPlus,
   FaRightToBracket,
   FaStore,
+  FaSun,
   FaTrash,
   FaUser,
   FaWhatsapp,
@@ -36,13 +45,43 @@ import {
 import "./CompanyShowcase.scss";
 import { useParams } from "react-router-dom";
 import ShowcaseService from "../services/ShowcaseService";
-import { mapShowcaseItems } from "../services/showcaseMappers";
+import useTheme from "../../../shared/Hooks/useTheme";
+import { mapShowcaseItems, showcaseItemToProduct } from "../services/showcaseMappers";
+import ShowcaseAssistant from "./ShowcaseAssistant";
+import MyRequests from "./MyRequests";
+import RequestSentDialog from "./RequestSentDialog";
+import {
+  groupSlotsByLocation,
+  safeMapsUrl,
+  slotKey,
+  slotsHaveLocations,
+  slotsLetCustomerChoose,
+} from "../services/slotLocations";
 import BookingSlotsService from "../services/BookingSlotsService";
+import {
+  DEFAULT_TIME_ZONE,
+  browserTimeZone,
+  formatOffset,
+  isValidTimeZone,
+  offsetMinutes,
+  placeName,
+  todayInZone,
+  zonedDateTime,
+} from "../../../shared/Utils/timeZones";
 import AppointmentRequestService from "../services/AppointmentRequestService";
 import WebOrderRequestService from "../services/WebOrderRequestService";
+import useCaptcha, { CaptchaWidget, isCaptchaError } from "../../../shared/Hooks/useCaptcha";
 import ShowcaseLoginService from "../services/ShowcaseLoginService";
+import { PoweredBy, AlephKBar } from "../../../shared/Brand/BrandLogo";
+import {
+  AUTH_STATES,
+  authProviderState,
+  authSoonLabel,
+  authSoonMessage,
+} from "../../../shared/Utils/authProviders";
 import {
   firebaseEmailLogin,
+  firebasePasswordReset,
   firebaseEmailRegister,
   firebaseSocialLogin,
   firebaseSignOut,
@@ -55,234 +94,11 @@ const showcaseLoginService = new ShowcaseLoginService();
 
 const showcaseService = new ShowcaseService();
 
+const DEFAULT_CURRENCY_SYMBOL = "$";
 const SHOWCASE_HERO_IMAGE = "/assets/showcase-hero.png";
-
+const SHOWCASE_LOGO_PLACEHOLDER = "/assets/showcase-logo-placeholder.svg";
 
 export const COMPANY_SHOWCASE_ROUTE = "/:companySlug";
-
-// Replace these companies with a public company-profile service.
-const MOCK_COMPANIES = [
-  {
-    id: "company-001",
-    slug: "maderas-finas-cr",
-    name: "Maderas Finas CR",
-    shortDescription: "Handcrafted in Costa Rica",
-    description: "Sustainable woods. Timeless craftsmanship.",
-    brandColor: "#3459e6",
-    accentColor: "#8a5a30",
-    whatsappNumber: "50688887777",
-    messengerHandle: "maderasfinascr",
-    currency: "USD",
-  },
-  {
-    id: "company-002",
-    slug: "servicios-auto-cr",
-    name: "Servicios Auto CR",
-    shortDescription: "Automotive care you can trust",
-    description: "Diagnostics, maintenance, and scheduled technical services.",
-    brandColor: "#176b87",
-    accentColor: "#e28a32",
-    whatsappNumber: "50687776666",
-    messengerHandle: "serviciosautocr",
-    currency: "USD",
-  },
-];
-
-// Replace this collection with a public product-search service.
-const MOCK_PRODUCTS = [
-  {
-    id: "prd-001",
-    companyId: "company-001",
-    code: "WCB-3040",
-    name: "Walnut Cutting Board",
-    category: "Cutting boards",
-    description: "Premium walnut with a smooth finish, designed for everyday use.",
-    price: 75,
-    image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: true,
-    allowsBooking: false,
-  },
-  {
-    id: "prd-002",
-    companyId: "company-001",
-    code: "TMB-4050",
-    name: "Teak and Maple End Grain Board",
-    category: "Cutting boards",
-    description: "End-grain construction with natural contrast and lasting durability.",
-    price: 85,
-    image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: true,
-    allowsBooking: false,
-  },
-  {
-    id: "prd-003",
-    companyId: "company-001",
-    code: "LES-3555",
-    name: "Engraved Live Edge Serving Board",
-    category: "Personalized products",
-    description: "A live-edge serving board personalized with your name or company logo.",
-    price: 90,
-    image: "https://images.unsplash.com/photo-1601058268499-e52658b8bb88?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: true,
-    allowsBooking: false,
-  },
-  {
-    id: "prd-004",
-    companyId: "company-001",
-    code: "GCB-3050",
-    name: "Guanacaste Cutting Board",
-    category: "Cutting boards",
-    description: "Strong native wood with a unique natural grain in every piece.",
-    price: 65,
-    image: "https://images.unsplash.com/photo-1584302179602-e4c3d3fd629d?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: true,
-    allowsBooking: false,
-  },
-  {
-    id: "prd-005",
-    companyId: "company-001",
-    code: "HWS-8018",
-    name: "Handmade Wall Shelf",
-    category: "Home furniture",
-    description: "A compact solid-wood shelf with a warm finish and hidden supports.",
-    price: 95,
-    image: "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: true,
-    allowsBooking: false,
-  },
-  {
-    id: "svc-001",
-    companyId: "company-001",
-    code: "ENG-CUSTOM",
-    name: "Custom Engraving Service",
-    category: "Services",
-    description: "Personalize wood pieces with names, logos, dates, or special designs.",
-    price: null,
-    image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: true,
-    allowsBooking: true,
-  },
-  {
-    id: "prd-006",
-    companyId: "company-001",
-    code: "RST-4520",
-    name: "Rustic Serving Tray",
-    category: "Serving pieces",
-    description: "A practical wooden tray with forged handles and a protective finish.",
-    price: 55,
-    image: "https://images.unsplash.com/photo-1603899122634-f086ca5f5ddd?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: true,
-    allowsBooking: false,
-  },
-  {
-    id: "prd-007",
-    companyId: "company-001",
-    code: "CHB-5030",
-    name: "Charcuterie Board",
-    category: "Serving pieces",
-    description: "An elegant board for cheese, fruit, appetizers, and special occasions.",
-    price: 78,
-    image: "https://images.unsplash.com/photo-1598301257982-0cf014dabbcd?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: true,
-    allowsBooking: false,
-  },
-  {
-    id: "prd-008",
-    companyId: "company-001",
-    code: "DSK-11055",
-    name: "Compact Writing Desk",
-    category: "Home furniture",
-    description: "A clean, compact solid-wood desk made for home offices and studios.",
-    price: 260,
-    image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: true,
-    allowsBooking: false,
-  },
-  {
-    id: "prd-009",
-    companyId: "company-001",
-    code: "SGN-6040",
-    name: "Personalized Wooden Sign",
-    category: "Personalized products",
-    description: "Custom carved signage for homes, offices, restaurants, and events.",
-    price: 70,
-    image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: true,
-    allowsBooking: false,
-  },
-  {
-    id: "prd-010",
-    companyId: "company-001",
-    code: "KNF-4530",
-    name: "Magnetic Knife Holder",
-    category: "Kitchen accessories",
-    description: "A wall-mounted solid-wood holder with concealed high-strength magnets.",
-    price: 48,
-    image: "https://images.unsplash.com/photo-1593618998160-e34014e67546?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: true,
-    allowsBooking: false,
-  },
-  {
-    id: "prd-011",
-    companyId: "company-001",
-    code: "SRV-SET4",
-    name: "Four-Piece Serving Set",
-    category: "Serving pieces",
-    description: "A coordinated handmade set for family gatherings and celebrations.",
-    price: 110,
-    image: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: true,
-    allowsBooking: false,
-  },
-  {
-    id: "svc-002",
-    companyId: "company-001",
-    code: "RESTORE-01",
-    name: "Wood Restoration Assessment",
-    category: "Services",
-    description: "Book an evaluation for furniture repairs, refinishing, or restoration.",
-    price: null,
-    image: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: false,
-    allowsBooking: true,
-  },
-  {
-    id: "svc-003",
-    companyId: "company-001",
-    code: "CONSULT-01",
-    name: "Custom Furniture Consultation",
-    category: "Services",
-    description: "Discuss measurements, materials, design options, and delivery expectations.",
-    price: null,
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: false,
-    allowsBooking: true,
-  },
-  {
-    id: "auto-001",
-    companyId: "company-002",
-    code: "DIAG-01",
-    name: "Vehicle Diagnostic",
-    category: "Diagnostics",
-    description: "Initial inspection and computerized diagnostic for your vehicle.",
-    price: 45,
-    image: "https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: false,
-    allowsBooking: true,
-  },
-  {
-    id: "auto-002",
-    companyId: "company-002",
-    code: "OIL-01",
-    name: "Oil Change Service",
-    category: "Maintenance",
-    description: "Scheduled oil and filter replacement with a basic safety inspection.",
-    price: 65,
-    image: "https://images.unsplash.com/photo-1486006920555-c77dcf18193c?auto=format&fit=crop&w=900&q=82",
-    allowsOnlineOrder: false,
-    allowsBooking: true,
-  },
-];
 
 const PRODUCTS_PER_PAGE = 10;
 
@@ -640,6 +456,53 @@ function GuestLocationMapDialog({ initialValue, onConfirm, onCancel, text }) {
   );
 }
 
+// Store clock (2026-11-04): the company's current time in its zone (label or
+// place + GMT offset) and, when the visitor's device is in another zone,
+// "= 18:28 your time". Refreshed every 15 seconds.
+export function ShowcaseClock({ t, locale = "en-US", timeZone, label = "" }) {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 15000);
+    return () => clearInterval(timer);
+  }, []);
+  const zone = isValidTimeZone(timeZone) ? timeZone : DEFAULT_TIME_ZONE;
+  const format = (z) => {
+    try {
+      return new Intl.DateTimeFormat(locale, { timeZone: z, hour: "2-digit", minute: "2-digit" }).format(now);
+    } catch {
+      return "";
+    }
+  };
+  const companyOffset = offsetMinutes(zone, now);
+  const zoneName = String(label || "").trim() || placeName(zone, locale);
+  const offset = formatOffset(companyOffset, { short: true });
+  const visitorZone = browserTimeZone();
+  const visitorDiffers = isValidTimeZone(visitorZone) && offsetMinutes(visitorZone, now) !== companyOffset;
+  const yourTime = visitorDiffers
+    ? t("companyShowcase.clock.yourTime", { defaultValue: "= {{time}} your time", time: format(visitorZone) })
+    : "";
+  const title = t("companyShowcase.clock.title", {
+    defaultValue: "Time of the business: {{time}}, {{zone}} ({{offset}})",
+    time: format(zone),
+    zone: zoneName,
+    offset,
+  });
+  return (
+    <div className="showcase-clock" role="timer" aria-live="off" title={yourTime ? `${title}\n${yourTime}` : title}>
+      <FaClock aria-hidden="true" />
+      <span>
+        <small>
+          {zoneName} · {offset}
+        </small>
+        <strong>
+          {format(zone)}
+          {yourTime && <em> {yourTime}</em>}
+        </strong>
+      </span>
+    </div>
+  );
+}
+
 export function GuestLocationPicker({ value, onChange, t, locale = "en-US", disabled = false }) {
   const [mapOpen, setMapOpen] = useState(false);
   const text = useCallback((key) => t(`companyShowcase.checkout.location.${key}`, {
@@ -691,19 +554,22 @@ const SHOWCASE_AUTH_TEXT = {
     loginSubtitle: "Welcome back. Please enter your details.",
     registerSubtitle: "One account for shopping across the platform.",
     account: "Your account",
-    demo: "Demo only. Use sample details; no real account is created.",
-    signedIn: "Signed in (demo)",
-    sessionHint: "This preview session ends when you refresh the page.",
+    signedIn: "Signed in",
+    myRequests: "My orders and bookings",
     email: "Email", password: "Password", confirmPassword: "Confirm password",
     passwordHint: "Use at least 8 characters.",
     mismatch: "The passwords do not match.",
     continueWith: "Or continue with", providerAction: "Continue with",
+    appleComingSoon: "Apple sign-in coming soon.",
     noAccount: "Don’t have an account?", hasAccount: "Already have an account?",
     signOut: "Sign out", close: "Close account dialog",
     continueAccount: "Continue with my account", reviewOrder: "Review your order",
-    orderDemo: "Demo checkout only. No real order will be sent.",
-    placeDemoOrder: "Place order (demo)", backToCart: "Back to cart",
-    demoOrderComplete: "Demo order completed. No real order was sent.",
+    backToCart: "Back to cart",
+    forgotPassword: "Forgot your password?",
+    forgotSending: "Sending...",
+    forgotEnterEmail: "Write your email first, then click “Forgot your password?”.",
+    forgotSent: "If an account exists for this email, we sent a link to reset the password. Check your inbox and spam folder.",
+    forgotFailed: "We could not send the email. Please try again later.",
   },
   es: {
     signIn: "Iniciar sesión", register: "Crear cuenta",
@@ -711,38 +577,48 @@ const SHOWCASE_AUTH_TEXT = {
     loginSubtitle: "Te damos la bienvenida. Ingresa tus datos.",
     registerSubtitle: "Una cuenta para comprar en toda la plataforma.",
     account: "Tu cuenta",
-    demo: "Solo demostración. Usa datos de ejemplo; no se crea una cuenta real.",
-    signedIn: "Sesión iniciada (demo)",
-    sessionHint: "Esta sesión de prueba termina al recargar la página.",
+    signedIn: "Sesión iniciada",
+    myRequests: "Mis pedidos y reservas",
     email: "Correo electrónico", password: "Contraseña", confirmPassword: "Confirmar contraseña",
     passwordHint: "Usa al menos 8 caracteres.",
     mismatch: "Las contraseñas no coinciden.",
     continueWith: "O continúa con", providerAction: "Continuar con",
+    appleComingSoon: "El inicio de sesión con Apple estará disponible pronto.",
     noAccount: "¿No tienes una cuenta?", hasAccount: "¿Ya tienes una cuenta?",
     signOut: "Cerrar sesión", close: "Cerrar ventana de cuenta",
     continueAccount: "Continuar con mi cuenta", reviewOrder: "Revisa tu pedido",
-    orderDemo: "Compra de demostración. No se enviará ningún pedido real.",
-    placeDemoOrder: "Realizar pedido (demo)", backToCart: "Volver al carrito",
-    demoOrderComplete: "Pedido de demostración completado. No se envió ningún pedido real.",
+    backToCart: "Volver al carrito",
+    forgotPassword: "¿Olvidaste tu contraseña?",
+    forgotSending: "Enviando...",
+    forgotEnterEmail: "Escribe primero tu correo y luego haz clic en “¿Olvidaste tu contraseña?”.",
+    forgotSent: "Si existe una cuenta con este correo, enviamos un enlace para cambiar la contraseña. Revisa tu bandeja de entrada y la carpeta de spam.",
+    forgotFailed: "No pudimos enviar el correo. Inténtalo de nuevo más tarde.",
   },
 };
 
-const MOCK_AUTH_PROVIDERS = [
+// Sign-in providers shown in the dialog. Facebook and Microsoft only work once
+// they are configured in Firebase; Apple shows a "coming soon" message.
+// (2026-10-26) Each button also follows its .env flag (REACT_APP_AUTH_GOOGLE /
+// _EMAIL / _MICROSOFT / _FACEBOOK / _APPLE = active | soon | hidden), see
+// src/App/shared/Utils/authProviders.js.
+const AUTH_PROVIDERS = [
   { id: "google", label: "Google", Icon: FaGoogle },
   { id: "facebook", label: "Facebook", Icon: FaFacebookF },
   { id: "microsoft", label: "Microsoft", Icon: FaMicrosoft },
   { id: "apple", label: "Apple", Icon: FaApple },
 ];
 
-export function ShowcaseAuthDialog({ user, text, brandColor, onClose, onComplete, onSignOut }) {
+export function ShowcaseAuthDialog({ user, text, brandColor, onClose, onComplete, onSignOut, onOpenMyRequests }) {
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ email: "", password: "", confirmPassword: "" });
   const [errorKey, setErrorKey] = useState("");
   const dialogRef = useRef(null);
   const titleId = useId();
-  const demoId = useId();
   const passwordHintId = useId();
   const registering = mode === "register";
+  const { i18n } = useTranslation();
+  const lang = i18n?.language || "es";
+  const emailState = authProviderState("email");
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -764,6 +640,7 @@ export function ShowcaseAuthDialog({ user, text, brandColor, onClose, onComplete
   const changeMode = (next) => {
     setMode(next);
     setErrorKey("");
+    setResetInfo("");
     setForm((current) => ({ ...current, password: "", confirmPassword: "" }));
   };
 
@@ -775,11 +652,47 @@ export function ShowcaseAuthDialog({ user, text, brandColor, onClose, onComplete
 
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [resetInfo, setResetInfo] = useState("");
+
+  // "Forgot your password?": Firebase sends the reset email. Always the same
+  // answer, so nobody can find out which emails have an account.
+  const handleForgotPassword = async () => {
+    const email = form.email.trim();
+    setErrorKey("");
+    setAuthError("");
+    setResetInfo("");
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setErrorKey("forgotEnterEmail");
+      return;
+    }
+    setAuthBusy(true);
+    try {
+      await firebasePasswordReset(email);
+      setResetInfo(text("forgotSent"));
+    } catch (error) {
+      const code = error?.code || "";
+      if (code === "auth/invalid-email") {
+        setErrorKey("forgotEnterEmail");
+      } else if (code === "auth/user-not-found") {
+        setResetInfo(text("forgotSent"));
+      } else {
+        console.error("Password reset error:", error);
+        setErrorKey("forgotFailed");
+      }
+    } finally {
+      setAuthBusy(false);
+    }
+  };
 
   // Real email/password auth against Firebase, then the backend /login (or
   // /createuser first when registering). The backend sets the session cookie.
   const submitAuth = async (event) => {
     event.preventDefault();
+    // .env flag (2026-10-26): "soon" only shows a message, no login code runs.
+    if (emailState !== AUTH_STATES.ACTIVE) {
+      setAuthError(authSoonMessage(lang));
+      return;
+    }
     if (!event.currentTarget.reportValidity()) return;
     if (registering && form.password !== form.confirmPassword) {
       setErrorKey("mismatch");
@@ -816,6 +729,18 @@ export function ShowcaseAuthDialog({ user, text, brandColor, onClose, onComplete
 
   // Real social sign-in (Google/Facebook/Microsoft). Apple not configured yet.
   const handleSocial = async (providerId) => {
+    // .env flag (2026-10-26): "soon" only shows a message; the code below is
+    // kept but not called. "hidden" buttons are not rendered at all.
+    const providerState = authProviderState(providerId);
+    if (providerState === AUTH_STATES.HIDDEN) return;
+    if (providerState === AUTH_STATES.SOON) {
+      setAuthError(authSoonMessage(lang));
+      return;
+    }
+    if (providerId === "apple") {
+      setAuthError(text("appleComingSoon"));
+      return;
+    }
     setAuthBusy(true);
     setAuthError("");
     try {
@@ -847,7 +772,6 @@ export function ShowcaseAuthDialog({ user, text, brandColor, onClose, onComplete
       className="company-showcase showcase-auth-dialog"
       style={{ "--showcase-brand": brandColor }}
       aria-labelledby={titleId}
-      aria-describedby={demoId}
       onCancel={(event) => { event.preventDefault(); onClose(); }}
       onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}
     >
@@ -863,11 +787,20 @@ export function ShowcaseAuthDialog({ user, text, brandColor, onClose, onComplete
           <div className="showcase-auth__profile">
             <span className="showcase-auth__badge"><FaCheck aria-hidden="true" />{text("signedIn")}</span>
             <strong>{user.email}</strong>
-            <p>{text("sessionHint")}</p>
+            {onOpenMyRequests && (
+              <button type="button" className="showcase-auth__submit showcase-auth__my-requests" onClick={onOpenMyRequests}>
+                <FaListCheck aria-hidden="true" /> {text("myRequests")}
+              </button>
+            )}
             <button type="button" className="showcase-auth__submit" onClick={onSignOut}>{text("signOut")}</button>
           </div>
         ) : (
           <>
+            {/* Email sign-in: hidden when REACT_APP_AUTH_EMAIL=hidden (2026-10-26). */}
+            {emailState === AUTH_STATES.HIDDEN && authError && (
+              <p className="showcase-auth__error" role="alert">{authError}</p>
+            )}
+            {emailState !== AUTH_STATES.HIDDEN && (<>
             <form className="showcase-form showcase-auth__form" onSubmit={submitAuth}>
               <label><span>{text("email")}</span><input type="email" name="email" autoComplete="email" value={form.email} onChange={updateForm} placeholder="name@example.com" required /></label>
               <label><span>{text("password")}</span><input type="password" name="password" autoComplete={registering ? "new-password" : "current-password"} value={form.password} onChange={updateForm} minLength={registering ? 8 : undefined} aria-describedby={registering ? passwordHintId : undefined} required /></label>
@@ -879,19 +812,32 @@ export function ShowcaseAuthDialog({ user, text, brandColor, onClose, onComplete
               )}
               {errorKey && <p className="showcase-auth__error" role="alert">{text(errorKey)}</p>}
               {authError && <p className="showcase-auth__error" role="alert">{authError}</p>}
+              {resetInfo && <p className="showcase-auth__info" role="status">{resetInfo}</p>}
+              {!registering && (
+                <button type="button" className="showcase-auth__forgot" onClick={handleForgotPassword} disabled={authBusy}>
+                  {authBusy ? text("forgotSending") : text("forgotPassword")}
+                </button>
+              )}
               <button type="submit" className="showcase-auth__submit" disabled={authBusy}>
                 {authBusy ? "..." : text(registering ? "register" : "signIn")}
               </button>
             </form>
             <div className="showcase-auth__divider"><span>{text("continueWith")}</span></div>
+            </>)}
             <div className="showcase-auth__providers" role="group" aria-label={text("continueWith")}>
-              {MOCK_AUTH_PROVIDERS.map(({ id, label, Icon }) => (
-                <button key={id} type="button" aria-label={`${text("providerAction")} ${label}`}
-                  disabled={authBusy}
-                  onClick={() => handleSocial(id)}>
-                  <Icon aria-hidden="true" /><span>{label}</span>
-                </button>
-              ))}
+              {AUTH_PROVIDERS.filter(({ id }) => authProviderState(id) !== AUTH_STATES.HIDDEN).map(({ id, label, Icon }) => {
+                const soon = authProviderState(id) === AUTH_STATES.SOON;
+                return (
+                  <button key={id} type="button"
+                    className={soon ? "is-soon" : undefined}
+                    aria-label={`${text("providerAction")} ${label}${soon ? ` (${authSoonLabel(lang)})` : ""}`}
+                    disabled={authBusy}
+                    onClick={() => handleSocial(id)}>
+                    <Icon aria-hidden="true" /><span>{label}</span>
+                    {soon && <span className="ak-soon" aria-hidden="true">{authSoonLabel(lang)}</span>}
+                  </button>
+                );
+              })}
             </div>
             <p className="showcase-auth__switch">
               {text(registering ? "hasAccount" : "noAccount")}{" "}
@@ -901,7 +847,6 @@ export function ShowcaseAuthDialog({ user, text, brandColor, onClose, onComplete
             </p>
           </>
         )}
-        <p className="showcase-auth__demo" id={demoId}>{text("demo")}</p>
       </div>
     </dialog>,
     document.body,
@@ -924,6 +869,93 @@ export function ShowcaseAccountControl({ user, open, text, onOpen }) {
   );
 }
 
+// Product zoom: landscape card with big image, name, price, full
+// description and the same buttons as the product card.
+// Opens when the customer clicks a product image (card or cart).
+// Terms / privacy text written by the company owner (Company page). Shown as
+// plain text (no HTML), so nothing in it can run as code.
+function ShowcaseLegalDialog({ title, body, closeText, brandColor, onClose }) {
+  const dialogRef = useRef(null);
+  const titleId = useId();
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const previousOverflow = document.body.style.overflow;
+    dialog.showModal();
+    document.body.style.overflow = "hidden";
+    return () => {
+      if (dialog.open) dialog.close();
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  return createPortal(
+    <dialog
+      ref={dialogRef}
+      className="company-showcase showcase-legal-dialog"
+      style={{ "--showcase-brand": brandColor }}
+      aria-labelledby={titleId}
+      onCancel={(event) => { event.preventDefault(); onClose(); }}
+      onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}
+    >
+      <div className="showcase-legal__body">
+        <div className="showcase-legal__heading">
+          <h2 id={titleId}>{title}</h2>
+          <button type="button" className="showcase-auth__close" onClick={onClose} aria-label={closeText}><FaXmark aria-hidden="true" /></button>
+        </div>
+        <div className="showcase-legal__text">{body}</div>
+      </div>
+    </dialog>,
+    document.body,
+  );
+}
+
+function ProductZoomDialog({ product, priceText, bookingText, closeText, brandColor, actions, onClose }) {
+  const dialogRef = useRef(null);
+  const titleId = useId();
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const opener = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    dialog.showModal();
+    document.body.style.overflow = "hidden";
+    return () => {
+      if (dialog.open) dialog.close();
+      document.body.style.overflow = previousOverflow;
+      if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
+    };
+  }, []);
+
+  return createPortal(
+    <dialog
+      ref={dialogRef}
+      className="company-showcase showcase-zoom-dialog"
+      style={{ "--showcase-brand": brandColor }}
+      aria-labelledby={titleId}
+      onCancel={(event) => { event.preventDefault(); onClose(); }}
+      onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}
+    >
+      <button type="button" className="showcase-zoom__close" onClick={onClose} aria-label={closeText}>
+        <FaXmark aria-hidden="true" />
+      </button>
+      <div className="showcase-zoom__image">
+        <img src={product.image} alt={product.name} />
+      </div>
+      <div className="showcase-zoom__info">
+        {product.allowsBooking && (
+          <span className="showcase-zoom__badge"><FaCalendarCheck aria-hidden="true" />{bookingText}</span>
+        )}
+        <h2 id={titleId}>{product.name}</h2>
+        <strong className="showcase-zoom__price">{priceText}</strong>
+        {product.description && <p>{product.description}</p>}
+        {actions}
+      </div>
+    </dialog>,
+    document.body,
+  );
+}
+
 export default function CompanyShowcase({ t, locale = "en-US" }) {
   const routeParams = useParams();
   const [companySlug] = useState(
@@ -931,10 +963,23 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       (routeParams?.companySlug || "").trim() || resolveCompanySlugFromPath(),
   );
   const [searchTerm, setSearchTerm] = useState("");
+  // Category chip selected ("" = all products).
+  const [selectedCategory, setSelectedCategory] = useState("");
+  // "My orders and bookings" dialog (signed-in customers).
+  const [showMyRequests, setShowMyRequests] = useState(false);
+  // Last order sent: shows how to pay (payment instructions + coming soon).
+  const [paymentNotice, setPaymentNotice] = useState(null);
+  // "Request sent — pending approval" pop-up (2026-11-08): booking and order
+  // requests must be approved by the company; the customer is told to check
+  // the email and how to contact the company.
+  const [requestSent, setRequestSent] = useState(null);
+  const closeRequestSent = useCallback(() => setRequestSent(null), []);
   const [currentPage, setCurrentPage] = useState(1);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [contactProductId, setContactProductId] = useState(null);
+  const [zoomProduct, setZoomProduct] = useState(null);
+  const [zoomAddedId, setZoomAddedId] = useState(null);
   const [checkoutMode, setCheckoutMode] = useState(null);
   const [guestForm, setGuestForm] = useState(EMPTY_GUEST_FORM);
   // Both entry points share this in-memory preview account and a single modal.
@@ -974,25 +1019,97 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
   });
   const [selectedSlotKey, setSelectedSlotKey] = useState("");
   const [selectedSlot, setSelectedSlot] = useState(null);
+  // Booking window (2026-11-08): scroll to the times after a date, to "Your
+  // choice" + "Your information" (end of the form) after a time, and a
+  // "back to top" button.
+  const bookingDialogRef = useRef(null);
+  const bookingSlotsRef = useRef(null);
+  const bookingChoiceRef = useRef(null);
+  const bookingInfoRef = useRef(null);
+  const [bookingShowTop, setBookingShowTop] = useState(false);
+  const smoothScrollTo = (ref, block = "start") => {
+    window.setTimeout(() => {
+      try {
+        ref.current?.scrollIntoView({ behavior: "smooth", block });
+      } catch {
+        ref.current?.scrollIntoView();
+      }
+    }, 60);
+  };
   const [daySlots, setDaySlots] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  // Reload the times after the server says the chosen one was just taken.
+  const [slotsReloadKey, setSlotsReloadKey] = useState(0);
+  const [slotTakenNotice, setSlotTakenNotice] = useState("");
+  // Locations (2026-11-07): "" = all locations, else a locationId.
+  const [slotLocationFilter, setSlotLocationFilter] = useState("");
   const [slotsError, setSlotsError] = useState("");
   const [bookingSaving, setBookingSaving] = useState(false);
   const [guestSaving, setGuestSaving] = useState(false);
   const [notice, setNotice] = useState("");
+  // CAPTCHA (Cloudflare Turnstile, 2026-10-25): one for the cart, one for bookings.
+  const orderCaptcha = useCaptcha();
+  const bookingCaptcha = useCaptcha();
+  const captchaPendingText = t("companyShowcase.messages.captchaPending", {
+    defaultValue: "Please complete the security check (the box above the button) and try again.",
+  });
 
   const [remoteProducts, setRemoteProducts] = useState([]);
   const [remoteCompany, setRemoteCompany] = useState(null);
+  // Logo and header configured by the company in the management app.
+  const [pageConfiguration, setPageConfiguration] = useState(null);
+  // Store bookings depend on the company plan (FREE: bookings only from the
+  // manager). shao returns bookingsEnabled: false then (2026-10-22).
+  const bookingsEnabled = pageConfiguration?.bookingsEnabled !== false;
+  // The company has no active plan (2026-10-23): the store stays visible but
+  // does not take orders or booking requests.
+  const acceptingOrders = pageConfiguration?.acceptingOrders !== false;
+  // Company time zone (2026-11-04): "today" of the calendar and the hours of
+  // the slots are the company's (default Costa Rica, GMT−6).
+  const companyTimeZone = isValidTimeZone(pageConfiguration?.timeZone)
+    ? pageConfiguration.timeZone
+    : DEFAULT_TIME_ZONE;
+  const companyTimeZoneLabel = String(pageConfiguration?.timeZoneLabel || "").trim();
+  const notTakingOrdersText = t("companyShowcase.messages.notTakingOrders", {
+    defaultValue: "This store is not taking orders right now. Please contact the business.",
+  });
+  const isStoreClosedError = (error) => error?.response?.result?.code === "PLAN_REQUIRED";
+  // Spam protection and server checks of the order / booking forms
+  // (2026-10-25, security S4): translated messages instead of the server text.
+  const publicFormErrorText = (error) => {
+    const code = error?.response?.result?.code;
+    if (isCaptchaError(code)) {
+      return code === "CAPTCHA_UNAVAILABLE"
+        ? t("companyShowcase.messages.captchaUnavailable", {
+            defaultValue: "The security check is not available right now. Please try again in a moment.",
+          })
+        : t("companyShowcase.messages.captchaFailed", {
+            defaultValue: "The security check failed. Please complete it again and resend.",
+          });
+    }
+    if (code === "PUBLIC_FORM_LIMIT") {
+      return t("companyShowcase.messages.tooManyRequests", {
+        defaultValue: "Too many requests were sent today. Please try again tomorrow or contact the business directly.",
+      });
+    }
+    const message = String(error?.message || "").toLowerCase();
+    if (error?.status === 400 && message.startsWith("invalid")) {
+      if (message.includes("email")) {
+        return t("companyShowcase.messages.invalidEmail", { defaultValue: "Please check the email address." });
+      }
+      if (message.includes("phone")) {
+        return t("companyShowcase.messages.invalidPhone", { defaultValue: "Please check the phone number." });
+      }
+      return t("companyShowcase.messages.invalidData", { defaultValue: "Please check the data of the form (some text is too long)." });
+    }
+    return "";
+  };
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [loadError, setLoadError] = useState("");
 
-  const matchedCompany =
-    MOCK_COMPANIES.find((item) => item.slug === companySlug) || null;
-
   // The route value is the companyId (public link is {base}/showcase/{companyId}).
-  // Keep mock branding when it matches; otherwise build a generic company so the
-  // public page renders with the real products. A public company-info endpoint
-  // can replace this fallback later.
+  // Real company data when loaded; otherwise a generic company so the public
+  // page still renders with the real products.
   const company =
     (remoteCompany && {
       id: companySlug,
@@ -1006,7 +1123,6 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       messengerHandle: remoteCompany.messengerHandle || remoteCompany.webMessengerLink || "",
       currency: remoteCompany.currency || "USD",
     }) ||
-    matchedCompany ||
     (companySlug
       ? {
           id: companySlug,
@@ -1021,6 +1137,63 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
           currency: "USD",
         }
       : null);
+
+  // Load the company page configuration (logo + header). Without one, the
+  // showcase keeps its default hero image and store icon.
+  useEffect(() => {
+    if (!companySlug) {
+      setPageConfiguration(null);
+      return undefined;
+    }
+    const controller = new AbortController();
+
+    showcaseService
+      .getPageConfiguration({ companyId: companySlug, signal: controller.signal })
+      .then((result) => setPageConfiguration(result))
+      .catch((error) => {
+        if (error?.name === "AbortError") return;
+        console.error("Error loading page configuration:", error);
+        setPageConfiguration(null);
+      });
+
+    return () => controller.abort();
+  }, [companySlug]);
+
+  const headerImage = pageConfiguration?.headerUrl || SHOWCASE_HERO_IMAGE;
+  const logoImage = pageConfiguration?.logoUrl || "";
+  const bannerLogo = logoImage || SHOWCASE_LOGO_PLACEHOLDER;
+  // "Name shown to customers" from the page configuration wins over the name
+  // that comes with the products data.
+  const bannerName = String(pageConfiguration?.displayName || "").trim();
+
+  // Light / dark mode (default: same as the visitor's device).
+  const { resolved: themeResolved, toggleTheme } = useTheme();
+  const themeLabel = themeResolved === "dark"
+    ? t("companyShowcase.theme.toLight", { defaultValue: "Switch to light mode" })
+    : t("companyShowcase.theme.toDark", { defaultValue: "Switch to dark mode" });
+
+  // Legal texts defined by the company owner. Nothing is shown when empty.
+  const termsText = String(pageConfiguration?.termsText || "").trim();
+  const privacyText = String(pageConfiguration?.privacyText || "").trim();
+  const hasLegalTexts = Boolean(termsText || privacyText);
+  const [legalDoc, setLegalDoc] = useState(null); // "terms" | "privacy" | null
+  const legalLabel = (key, fallback) => t(`companyShowcase.legal.${key}`, { defaultValue: fallback });
+  const legalLinks = hasLegalTexts && (
+    <span className="showcase-legal__links">
+      {termsText && (
+        <button type="button" onClick={() => setLegalDoc("terms")}>{legalLabel("terms", "Terms and conditions")}</button>
+      )}
+      {termsText && privacyText && <span aria-hidden="true">·</span>}
+      {privacyText && (
+        <button type="button" onClick={() => setLegalDoc("privacy")}>{legalLabel("privacy", "Privacy policy")}</button>
+      )}
+    </span>
+  );
+  const legalNotice = hasLegalTexts && (
+    <p className="showcase-legal__notice">
+      {legalLabel("notice", "By sending, you accept:")} {legalLinks}
+    </p>
+  );
 
   // Load the real public products for this company id.
   useEffect(() => {
@@ -1065,16 +1238,35 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
     [remoteProducts],
   );
 
+  // Category chips: real names only (internal ids are never shown), sorted,
+  // with the number of products in each.
+  const categoryChips = useMemo(() => {
+    const counts = new Map();
+    companyProducts.forEach((product) => {
+      const name = String(product.categoryName || "").trim();
+      if (name) counts.set(name, (counts.get(name) || 0) + 1);
+    });
+    return [...counts.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name, locale));
+  }, [companyProducts, locale]);
+
   const filteredProducts = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
-    if (!term) return companyProducts;
-
-    return companyProducts.filter((product) =>
-      `${product.name} ${product.description} ${product.code}`
+    return companyProducts.filter((product) => {
+      if (selectedCategory && product.categoryName !== selectedCategory) return false;
+      if (!term) return true;
+      return `${product.name} ${product.description} ${product.code} ${product.categoryName || ""}`
         .toLowerCase()
-        .includes(term),
-    );
-  }, [companyProducts, searchTerm]);
+        .includes(term);
+    });
+  }, [companyProducts, searchTerm, selectedCategory]);
+
+  const chooseCategory = (name) => {
+    setSelectedCategory(name);
+    setCurrentPage(1);
+    setContactProductId(null);
+  };
 
   const totalPages = Math.max(
     1,
@@ -1103,20 +1295,35 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
     (total, item) => total + (item.product.price || 0) * item.quantity,
     0,
   );
+  // Subtotal symbol: the products' symbol when all lines share it, "$" otherwise.
+  const cartSymbols = new Set(
+    cartItems.map((item) => item.product.currencySymbol || DEFAULT_CURRENCY_SYMBOL),
+  );
+  // One currency per store (Company page); the products already use it.
+  const cartCurrencySymbol =
+    String(pageConfiguration?.currencySymbol || "").trim() ||
+    (cartSymbols.size === 1 ? [...cartSymbols][0] : DEFAULT_CURRENCY_SYMBOL);
 
   const bookingProduct =
     companyProducts.find((product) => product.id === bookingProductId) || null;
 
-  const formatPrice = (price) => {
+  // Price with the product currency symbol (set per product in the
+  // management app; "$" by default). One-character symbols go right before
+  // the number ("₡5,000"); longer ones get a space ("R$ 45", "S/ 20").
+  const formatPrice = (price, currencySymbol = DEFAULT_CURRENCY_SYMBOL) => {
     if (price === null || price === undefined) {
       return t("companyShowcase.product.customQuote");
     }
 
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency: company?.currency || "USD",
-      maximumFractionDigits: 0,
+    const symbol = String(currencySymbol || "").trim() || DEFAULT_CURRENCY_SYMBOL;
+    // Whole amounts without decimals ("$45"); others with two ("$12.50").
+    const decimals = Number.isInteger(Number(price)) ? 0 : 2;
+    const amount = new Intl.NumberFormat(locale, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
     }).format(price);
+
+    return Array.from(symbol).length > 1 ? `${symbol} ${amount}` : `${symbol}${amount}`;
   };
 
   const updateSearch = (event) => {
@@ -1270,11 +1477,16 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       })),
     };
 
+    if (!orderCaptcha.ready) {
+      setNotice(captchaPendingText);
+      return;
+    }
     setGuestSaving(true);
     try {
       const response = await webOrderRequestService.createWebOrder({
         companyId,
         order,
+        captchaToken: orderCaptcha.token,
       });
       const code =
         response?.result?.requestCode ||
@@ -1283,6 +1495,8 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       setCart([]);
       setShowCart(false);
       setCheckoutMode(null);
+      setPaymentNotice({ reference: code });
+      setRequestSent({ kind: "order", reference: code, email: guestForm.email.trim() });
       setNotice(
         t("companyShowcase.messages.orderCreated", {
           defaultValue:
@@ -1295,6 +1509,8 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
     } catch (error) {
       console.error("Error sending guest order:", error);
       setNotice(
+        (isStoreClosedError(error) && notTakingOrdersText) ||
+        publicFormErrorText(error) ||
         error?.message ||
           t("companyShowcase.messages.orderError", {
             defaultValue: "Your order could not be sent. Please try again.",
@@ -1302,6 +1518,7 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       );
     } finally {
       setGuestSaving(false);
+      orderCaptcha.reset(); // a CAPTCHA token works only once
     }
   };
 
@@ -1379,11 +1596,16 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       })),
     };
 
+    if (!orderCaptcha.ready) {
+      setNotice(captchaPendingText);
+      return;
+    }
     setGuestSaving(true);
     try {
       const response = await webOrderRequestService.createWebOrder({
         companyId,
         order,
+        captchaToken: orderCaptcha.token,
       });
       const code =
         response?.result?.requestCode ||
@@ -1392,6 +1614,8 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       setCart([]);
       setShowCart(false);
       setCheckoutMode(null);
+      setPaymentNotice({ reference: code });
+      setRequestSent({ kind: "order", reference: code, email: order.email });
       setNotice(
         t("companyShowcase.messages.orderCreated", {
           defaultValue:
@@ -1404,6 +1628,8 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
     } catch (error) {
       console.error("Error sending account order:", error);
       setNotice(
+        (isStoreClosedError(error) && notTakingOrdersText) ||
+        publicFormErrorText(error) ||
         error?.message ||
           t("companyShowcase.messages.orderError", {
             defaultValue: "Your order could not be sent. Please try again.",
@@ -1411,29 +1637,35 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       );
     } finally {
       setGuestSaving(false);
+      orderCaptcha.reset(); // a CAPTCHA token works only once
     }
   };
 
   const openBooking = (product) => {
+    setSlotTakenNotice("");
     setBookingProductId(product.id);
     setBookingForm(EMPTY_BOOKING_FORM);
     setSelectedSlotKey("");
     setSelectedSlot(null);
     setDaySlots([]);
     setSlotsError("");
-    const now = new Date();
-    setCalendarMonth(new Date(now.getFullYear(), now.getMonth(), 1));
+    setSlotLocationFilter("");
+    // The month of "today" in the company zone (2026-11-04).
+    const [todayYear, todayMonth] = todayInZone(companyTimeZone).split("-").map(Number);
+    setCalendarMonth(new Date(todayYear, todayMonth - 1, 1));
     setContactProductId(null);
     setNotice("");
   };
 
   const closeBooking = () => {
+    setBookingShowTop(false);
     setBookingProductId(null);
     setBookingForm(EMPTY_BOOKING_FORM);
     setSelectedSlotKey("");
     setSelectedSlot(null);
     setDaySlots([]);
     setSlotsError("");
+    setSlotLocationFilter("");
   };
 
   // Load real slots from the backend whenever a date is chosen.
@@ -1491,7 +1723,7 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
     return () => {
       active = false;
     };
-  }, [bookingProductIdForSlots, bookingForm.preferredDate, companyIdForSlots]);
+  }, [bookingProductIdForSlots, bookingForm.preferredDate, companyIdForSlots, slotsReloadKey]);
 
   // ---- Calendar helpers (simple month grid) ----
   const pad2 = (n) => String(n).padStart(2, "0");
@@ -1509,10 +1741,160 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
     return cells;
   }, [calendarMonth]);
 
-  const todayKey = (() => {
-    const n = new Date();
-    return toDateKey(n.getFullYear(), n.getMonth(), n.getDate());
-  })();
+  // "Today" in the company time zone, not the visitor's (2026-11-04).
+  const todayKey = todayInZone(companyTimeZone);
+
+  // Line under the slots: "Times shown in Costa Rica time (GMT−6)", and the
+  // visitor's own time when the device is in another zone.
+  const visitorTimeZone = browserTimeZone();
+  const slotsZoneInfo = useMemo(() => {
+    const date = bookingForm.preferredDate;
+    if (!date) return null;
+    const middayMoment = zonedDateTime(date, "12:00", companyTimeZone) || new Date();
+    const companyOffset = offsetMinutes(companyTimeZone, middayMoment);
+    const zoneName = companyTimeZoneLabel || placeName(companyTimeZone, locale);
+    const differentZone =
+      isValidTimeZone(visitorTimeZone) && offsetMinutes(visitorTimeZone, middayMoment) !== companyOffset;
+    return { zoneName, offset: formatOffset(companyOffset, { short: true }), differentZone };
+  }, [bookingForm.preferredDate, companyTimeZone, companyTimeZoneLabel, locale, visitorTimeZone]);
+
+  // "= 15:00 your time" (with the day when it is another day).
+  const visitorTimeText = (slot) => {
+    if (!slotsZoneInfo?.differentZone || slot.allDay || !slot.startTime) return "";
+    const moment = zonedDateTime(bookingForm.preferredDate, slot.startTime, companyTimeZone);
+    if (!moment) return "";
+    const sameDay = todayInZone(visitorTimeZone, moment) === bookingForm.preferredDate;
+    try {
+      return moment.toLocaleString(locale, {
+        ...(sameDay ? {} : { weekday: "short", day: "numeric" }),
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "";
+    }
+  };
+
+  // Locations (2026-11-07): the free times grouped by location (name,
+  // address, "Open in Maps"); with 2 or more locations the visitor can show
+  // only one. Without locations the list is the same as before.
+  const renderSlotButton = (slot, i) => {
+    const key = slotKey(slot);
+    const label = slot.allDay
+      ? t("companyShowcase.booking.allDay", { defaultValue: "All day" })
+      : `${slot.startTime} - ${slot.endTime}`;
+    return (
+      <button
+        key={`${key}-${i}`}
+        type="button"
+        className={[
+          "booking-slot",
+          selectedSlotKey === key ? "is-selected" : "",
+        ].filter(Boolean).join(" ")}
+        onClick={() => selectSlot(slot)}
+      >
+        <span>{label}</span>
+        <small>
+          {slot.remaining}{" "}
+          {t("companyShowcase.booking.left", { defaultValue: "left" })}
+        </small>
+        {visitorTimeText(slot) && (
+          <small className="booking-slot__local">
+            {t("companyShowcase.booking.yourTime", {
+              defaultValue: "= {{time}} your time",
+              time: visitorTimeText(slot),
+            })}
+          </small>
+        )}
+      </button>
+    );
+  };
+
+  const renderSlotGroups = () => {
+    if (!slotsHaveLocations(daySlots)) {
+      return <div className="booking-slots__list">{daySlots.map(renderSlotButton)}</div>;
+    }
+    const groups = groupSlotsByLocation(daySlots);
+    const located = groups.filter((group) => group.locationId);
+    const filter = located.some((group) => group.locationId === slotLocationFilter) ? slotLocationFilter : "";
+    const visibleGroups = filter ? groups.filter((group) => group.locationId === filter) : groups;
+    return (
+      <>
+        {slotsLetCustomerChoose(daySlots) && located.length >= 2 && (
+          <p className="booking-locations-choice" role="note">
+            <FaLocationDot aria-hidden="true" />
+            {t("companyShowcase.booking.customerChooses", {
+              defaultValue: "You choose the location: pick the time in the location you prefer.",
+            })}
+          </p>
+        )}
+        {located.length >= 2 && (
+          <div
+            className="booking-locations-filter"
+            role="group"
+            aria-label={t("companyShowcase.booking.locationFilter", { defaultValue: "Location" })}
+          >
+            <button
+              type="button"
+              className={!filter ? "is-active" : ""}
+              aria-pressed={!filter}
+              onClick={() => setSlotLocationFilter("")}
+            >
+              {t("companyShowcase.booking.allLocations", { defaultValue: "All locations" })}
+            </button>
+            {located.map((group) => (
+              <button
+                key={group.key}
+                type="button"
+                className={filter === group.locationId ? "is-active" : ""}
+                aria-pressed={filter === group.locationId}
+                onClick={() => setSlotLocationFilter(group.locationId)}
+              >
+                <FaLocationDot aria-hidden="true" /> {group.name}
+              </button>
+            ))}
+          </div>
+        )}
+        {visibleGroups.map((group) => (
+          <section className="booking-location-group" key={group.key}>
+            <div className="booking-location-group__header">
+              <FaLocationDot aria-hidden="true" />
+              <div className="booking-location-group__text">
+                <strong>
+                  {group.locationId
+                    ? group.name
+                    : t("companyShowcase.booking.otherTimes", { defaultValue: "Other times" })}
+                </strong>
+                {group.address && <small>{group.address}</small>}
+                {group.details && <small>{group.details}</small>}
+              </div>
+              {safeMapsUrl(group.mapsUrl) && (
+                <a href={safeMapsUrl(group.mapsUrl)} target="_blank" rel="noopener noreferrer">
+                  {t("companyShowcase.booking.openMaps", { defaultValue: "Open in Maps" })}
+                </a>
+              )}
+            </div>
+            <div className="booking-slots__list">{group.slots.map(renderSlotButton)}</div>
+          </section>
+        ))}
+      </>
+    );
+  };
+
+  // "Lunes, 9 de noviembre · 15:00 - 16:00" (Your choice and the pop-up).
+  const choiceWhenText = (dateKey, slot) => {
+    if (!dateKey || !slot) return "";
+    const [y, m, d] = dateKey.split("-").map(Number);
+    const day = new Date(y, m - 1, d).toLocaleDateString(locale, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+    const time = slot.allDay
+      ? t("companyShowcase.booking.allDay", { defaultValue: "All day" })
+      : `${slot.startTime} - ${slot.endTime}`;
+    return `${day.charAt(0).toUpperCase()}${day.slice(1)} · ${time}`;
+  };
 
   const pickCalendarDay = (day) => {
     if (!day) return;
@@ -1522,7 +1904,9 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       day,
     );
     if (key < todayKey) return; // no past dates
+    setSlotTakenNotice("");
     setBookingForm((current) => ({ ...current, preferredDate: key }));
+    smoothScrollTo(bookingSlotsRef);
   };
 
   const moveMonth = (delta) => {
@@ -1532,13 +1916,17 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
   };
 
   const selectSlot = (slot) => {
-    const key = `${slot.startTime}-${slot.endTime}`;
+    setSlotTakenNotice("");
+    // The same hour in two locations are two different slots (2026-11-07).
+    const key = slotKey(slot);
     setSelectedSlotKey(key);
     setSelectedSlot(slot);
     setBookingForm((current) => ({
       ...current,
       preferredTime: slot.allDay ? "" : slot.startTime,
     }));
+    // Go to the last part: "Your choice" + the contact fields (2026-11-08).
+    smoothScrollTo(bookingInfoRef);
   };
 
   const submitBooking = async (event) => {
@@ -1573,34 +1961,72 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       appointmentDate: bookingForm.preferredDate,
       startHour: selectedSlot.startTime || bookingForm.preferredTime,
       endHour: selectedSlot.endTime || bookingForm.preferredTime,
+      // Location of the chosen time (2026-11-07); "" when it has none.
+      locationId: selectedSlot.locationId || "",
       comments:
         `Preferred contact: ${bookingForm.preferredContact}. ` +
         (bookingForm.notes || ""),
     };
 
+    if (!bookingCaptcha.ready) {
+      setSlotsError(captchaPendingText);
+      return;
+    }
     setBookingSaving(true);
     setSlotsError("");
     try {
       const response = await appointmentRequestService.createRequest({
         companyId,
         request,
+        captchaToken: bookingCaptcha.token,
       });
       const reference =
         response?.result?.appointmentId ||
         response?.result?.appointment_id ||
         buildReference("BKG");
+      const where = selectedSlot.locationName
+        ? ` ${t("companyShowcase.booking.locationNotice", {
+            defaultValue: "Location: {{location}}.",
+            location: [selectedSlot.locationName, selectedSlot.locationAddress].filter(Boolean).join(", "),
+          })}`
+        : "";
+      setRequestSent({
+        kind: "booking",
+        reference: String(reference),
+        email: request.email,
+        details: [
+          bookingProduct.name,
+          choiceWhenText(bookingForm.preferredDate, selectedSlot),
+          [selectedSlot.locationName, selectedSlot.locationAddress].filter(Boolean).join(", "),
+        ],
+      });
       setNotice(
         t("companyShowcase.messages.bookingCreated", {
           defaultValue:
             "Your booking request was sent. Reference: {reference}. The company will confirm it.",
           reference,
           service: bookingProduct.name,
-        }).replace("{reference}", String(reference)),
+        }).replace("{reference}", String(reference)) + where,
       );
       closeBooking();
     } catch (error) {
       console.error("Error sending booking request:", error);
+      // The server checks the slot again: if someone took it in the meantime,
+      // show a clear message and reload the free times for that date.
+      if (error?.status === 409 && error?.response?.result?.code === "SLOT_TAKEN") {
+        setSelectedSlot(null);
+        setSelectedSlotKey("");
+        setSlotTakenNotice(
+          t("companyShowcase.booking.slotTaken", {
+            defaultValue: "This time was just taken. Please choose another time.",
+          }),
+        );
+        setSlotsReloadKey((key) => key + 1);
+        return;
+      }
       setSlotsError(
+        (isStoreClosedError(error) && notTakingOrdersText) ||
+        publicFormErrorText(error) ||
         error?.message ||
           t("companyShowcase.booking.submitError", {
             defaultValue: "Your request could not be sent. Please try again.",
@@ -1608,6 +2034,7 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       );
     } finally {
       setBookingSaving(false);
+      bookingCaptcha.reset(); // a CAPTCHA token works only once
     }
   };
 
@@ -1621,18 +2048,29 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
     setBookingForm((current) => ({ ...current, [name]: value }));
   };
 
-  // A product has WhatsApp if it carries a contact phone; Messenger if it
-  // carries a messenger link. The buttons are enabled accordingly.
-  const productWhatsappNumber = (product) =>
-    String(product?.webContactPhone || "").replace(/[^0-9]/g, "");
+  // "Contact us" (2026-10-31): the COMPANY WhatsApp and social network link
+  // (Company page) are used for every product. Each one is shown only when the
+  // company set it; with neither, there is no "Contact us" button. The message
+  // still names the product, so customer service knows what it is about.
+  const companyWhatsappDigits = String(pageConfiguration?.contactWhatsapp || "").replace(/[^0-9]/g, "");
+  const companySocialLink = /^https?:\/\//i.test(String(pageConfiguration?.socialLink || "").trim())
+    ? String(pageConfiguration.socialLink).trim()
+    : "";
+  const companySocialType = String(pageConfiguration?.socialLinkType || "OTHER").toUpperCase();
+  const SocialIcon =
+    { FACEBOOK: FaFacebookMessenger, INSTAGRAM: FaInstagram, TIKTOK: FaTiktok }[companySocialType] || FaLink;
+  const socialLabel =
+    { FACEBOOK: "Facebook / Messenger", INSTAGRAM: "Instagram", TIKTOK: "TikTok" }[companySocialType] ||
+    t("companyShowcase.contact.socialOther", { defaultValue: "Social network" });
 
-  const productMessengerLink = (product) =>
-    String(product?.webMessengerLink || "").trim();
+  const productWhatsappNumber = () => companyWhatsappDigits;
+
+  const productMessengerLink = () => companySocialLink;
 
   const hasWhatsapp = (product) => productWhatsappNumber(product).length > 0;
   const hasMessenger = (product) => productMessengerLink(product).length > 0;
 
-  // WhatsApp deep link using the PRODUCT'S own phone (empty if none).
+  // WhatsApp deep link using the company phone (empty if none).
   const whatsappUrl = (product) => {
     const number = productWhatsappNumber(product);
     if (!number) return "";
@@ -1651,8 +2089,229 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
     return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
   };
 
-  // Messenger link using the PRODUCT'S own link (empty if none).
+  // Company social network link (empty if none).
   const messengerUrl = (product) => productMessengerLink(product);
+
+  // ---- AI assistant (Aleph) actions -------------------------------------
+  // The backend only returns actions for PUBLIC products of THIS company and
+  // already checked the type (cart / booking / contact). The page runs them
+  // with its normal functions. There is no action to place an order or send
+  // a booking request: the visitor always confirms those.
+
+  // The product may not be in the loaded list (search, paging): add it.
+  const ensureAssistantProduct = (action) => {
+    const existing = companyProducts.find((product) => product.id === action.productId);
+    if (existing) return existing;
+    if (!action.product) return null;
+    const mapped = showcaseItemToProduct(action.product, companySlug);
+    if (!mapped.id) return null;
+    setRemoteProducts((current) =>
+      current.some((product) => product.id === mapped.id) ? current : [...current, mapped],
+    );
+    return mapped;
+  };
+
+  const assistantText = (key, options) => t(`showcaseAssistant.${key}`, options);
+
+  const handleAssistantAction = (action) => {
+    const type = String(action?.type || "");
+
+    if (type === "open_cart") {
+      openCart();
+      return { note: assistantText("noteCart") };
+    }
+    if (type === "open_login") {
+      setAuthOrigin("header");
+      return { note: assistantText("noteLogin") };
+    }
+
+    const product = ensureAssistantProduct(action || {});
+    if (!product) return null;
+
+    if (type === "add_to_cart" && product.allowsOnlineOrder) {
+      const quantity = Math.min(Math.max(Number(action.quantity) || 1, 1), 20);
+      setCart((current) => {
+        const line = current.find((item) => item.productId === product.id);
+        return line
+          ? current.map((item) =>
+              item.productId === product.id ? { ...item, quantity: item.quantity + quantity } : item,
+            )
+          : [...current, { productId: product.id, quantity }];
+      });
+      setNotice(t("companyShowcase.messages.addedToCart", { product: product.name }));
+      return { note: assistantText("noteAdded", { product: product.name, quantity }) };
+    }
+
+    if (type === "set_cart_quantity" && product.allowsOnlineOrder) {
+      const quantity = Math.min(Math.max(Number(action.quantity) || 0, 0), 20);
+      setCart((current) => {
+        const exists = current.some((item) => item.productId === product.id);
+        const next = exists
+          ? current.map((item) => (item.productId === product.id ? { ...item, quantity } : item))
+          : [...current, { productId: product.id, quantity }];
+        return next.filter((item) => item.quantity > 0);
+      });
+      return {
+        note: quantity > 0
+          ? assistantText("noteQuantity", { product: product.name, quantity })
+          : assistantText("noteRemoved", { product: product.name }),
+      };
+    }
+
+    if (type === "open_booking" && product.allowsBooking && bookingsEnabled) {
+      openBooking(product);
+      const date = String(action.date || "");
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date) && date >= todayKey) {
+        const [year, month] = date.split("-").map(Number);
+        setBookingForm((current) => ({ ...current, preferredDate: date }));
+        setCalendarMonth(new Date(year, month - 1, 1));
+      }
+      return { note: assistantText("noteBooking", { product: product.name }) };
+    }
+
+    if (type === "show_contact") {
+      setContactProductId(product.id);
+      return {
+        contact: {
+          productName: product.name,
+          whatsappUrl: hasWhatsapp(product) ? whatsappUrl(product) : "",
+          messengerUrl: hasMessenger(product) ? messengerUrl(product) : "",
+        },
+      };
+    }
+
+    return null;
+  };
+
+  useEffect(() => {
+    if (!zoomAddedId) return undefined;
+    const timer = setTimeout(() => setZoomAddedId(null), 1800);
+    return () => clearTimeout(timer);
+  }, [zoomAddedId]);
+
+  // Product buttons (Order here / Contact us / Book now). Shared by the
+  // product card and the zoom view so both always show the same actions.
+  //   variant "card": original card buttons (contact opens a small menu).
+  //   variant "zoom": contact channels shown directly; "Order here" stays in
+  //                   the zoom and shows "Added"; "Book now" closes the zoom.
+  const renderProductActions = (product, variant = "card") => {
+    const inZoom = variant === "zoom";
+    const hasContact = hasWhatsapp(product) || hasMessenger(product);
+    const justAdded = inZoom && zoomAddedId === product.id;
+
+    const contactLinks = (
+      <>
+        {hasWhatsapp(product) && (
+          <a
+            href={whatsappUrl(product)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <FaWhatsapp />
+            <span>
+              <strong>WhatsApp</strong>
+              <small>{t("companyShowcase.contact.externalChannel")}</small>
+            </span>
+          </a>
+        )}
+
+        {hasMessenger(product) && (
+          <a href={messengerUrl(product)} target="_blank" rel="noreferrer">
+            <SocialIcon />
+            <span>
+              <strong>{socialLabel}</strong>
+              <small>{t("companyShowcase.contact.externalChannel")}</small>
+            </span>
+          </a>
+        )}
+      </>
+    );
+
+    return (
+      <div className={inZoom ? "showcase-zoom__actions" : "showcase-product-card__actions"}>
+        {product.allowsOnlineOrder && (
+          <button
+            type="button"
+            className="showcase-button showcase-button--primary"
+            onClick={() => {
+              addToCart(product);
+              if (inZoom) setZoomAddedId(product.id);
+            }}
+          >
+            {justAdded ? <FaCheck /> : <FaCartPlus />}
+            {justAdded
+              ? t("companyShowcase.actions.added", { defaultValue: "Added" })
+              : t("companyShowcase.actions.orderHere")}
+          </button>
+        )}
+
+        {product.allowsBooking && bookingsEnabled && inZoom && (
+          <button
+            type="button"
+            className="showcase-button showcase-button--booking"
+            onClick={() => {
+              setZoomProduct(null);
+              openBooking(product);
+            }}
+          >
+            <FaCalendarCheck />
+            {t("companyShowcase.actions.bookNow")}
+          </button>
+        )}
+
+        {/* "Contact us" for every kind of product (cart, booking,
+            contact-only), but only when the product has at least
+            one channel; the menu lists only the channels it has. */}
+        {hasContact && inZoom && (
+          <div className="showcase-zoom__contact">
+            <span>{t("companyShowcase.actions.contactUs")}</span>
+            <div className="contact-menu">{contactLinks}</div>
+          </div>
+        )}
+
+        {hasContact && !inZoom && (
+        <div className="contact-action">
+          <button
+            type="button"
+            className="showcase-button showcase-button--secondary"
+            onClick={() =>
+              setContactProductId((current) =>
+                current === product.id ? null : product.id,
+              )
+            }
+            aria-expanded={contactProductId === product.id}
+          >
+            {t("companyShowcase.actions.contactUs")}
+            <FaChevronDown />
+          </button>
+
+          {contactProductId === product.id && (
+            <div className="contact-menu">{contactLinks}</div>
+          )}
+        </div>
+        )}
+
+        {product.allowsBooking && !bookingsEnabled && (
+          <p className="showcase-booking-off">
+            {t("companyShowcase.actions.bookingByContact", {
+              defaultValue: "To book this service, contact the business.",
+            })}
+          </p>
+        )}
+
+        {product.allowsBooking && bookingsEnabled && !inZoom && (
+          <button
+            type="button"
+            className="showcase-button showcase-button--booking"
+            onClick={() => openBooking(product)}
+          >
+            <FaCalendarCheck />
+            {t("companyShowcase.actions.bookNow")}
+          </button>
+        )}
+      </div>
+    );
+  };
 
   if (!company) {
     return (
@@ -1670,14 +2329,18 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
       style={{
         "--showcase-brand": company.brandColor,
         "--showcase-accent": company.accentColor,
+        ...(logoImage && { "--showcase-logo": `url("${logoImage}")` }),
       }}
     >
+      {/* AlephK platform bar on top (2026-10-25); the company's own header comes second. */}
+      <AlephKBar />
+
       <header className="showcase-header">
         <a className="showcase-brand" href={`/showcase/${company.slug}`}>
-          <span><FaStore /></span>
+          <span>{!logoImage && <FaStore />}</span>
           <div>
-            <strong>{t("companyShowcase.brandName")}</strong>
-            <small>{t("companyShowcase.publicStore")}</small>
+            <strong>{bannerName || company.name}</strong>
+            <small>{company.shortDescription || t("companyShowcase.publicStore")}</small>
           </div>
         </a>
 
@@ -1704,6 +2367,19 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
         </label>
 
         <div className="showcase-header-actions">
+          {/* Company time (2026-11-04), once the page configuration is loaded. */}
+          {pageConfiguration && (
+            <ShowcaseClock t={t} locale={locale} timeZone={companyTimeZone} label={companyTimeZoneLabel} />
+          )}
+          <button
+            type="button"
+            className="showcase-theme-button"
+            onClick={toggleTheme}
+            aria-label={themeLabel}
+            title={themeLabel}
+          >
+            {themeResolved === "dark" ? <FaSun aria-hidden="true" /> : <FaMoon aria-hidden="true" />}
+          </button>
           <ShowcaseAccountControl user={mockUser} open={Boolean(authOrigin)} text={authText} onOpen={() => setAuthOrigin("header")} />
           <button
             type="button"
@@ -1719,14 +2395,22 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
 
       <div className="showcase-body">
         <section
-          className="showcase-company-banner"
-          style={{ "--showcase-hero": `url(${SHOWCASE_HERO_IMAGE})` }}
+          className="showcase-company-banner showcase-company-banner--with-logo"
+          style={{ "--showcase-hero": `url("${headerImage}")` }}
         >
+          <img
+            className="showcase-company-banner__logo"
+            src={bannerLogo}
+            alt={t("companyShowcase.logoAlt", { name: bannerName || company.name })}
+          />
           <div className="showcase-company-banner__content">
-            <span className="showcase-company-banner__eyebrow">
-              <FaCheck /> {t("companyShowcase.verifiedCompany")}
-            </span>
-            <h1>{company.name}</h1>
+            {/* Only companies verified in tbl_company_verification. */}
+            {pageConfiguration?.verified === true && (
+              <span className="showcase-company-banner__eyebrow">
+                <FaCheck /> {t("companyShowcase.verifiedCompany")}
+              </span>
+            )}
+            <h1>{bannerName || company.name}</h1>
             <p>{company.shortDescription || company.description || t("companyShowcase.fallbacks.companyDescription")}</p>
             <a href="#showcase-products" className="showcase-company-banner__cta">
               {t("companyShowcase.actions.explore")}
@@ -1735,6 +2419,12 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
           </div>
         </section>
 
+        {!acceptingOrders && (
+          <div className="showcase-closed-note showcase-closed-note--banner" role="status">
+            {notTakingOrdersText}
+          </div>
+        )}
+
         {notice && (
           <div className="showcase-notice" role="status">
             <FaCheck />
@@ -1742,6 +2432,29 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
             <button
               type="button"
               onClick={() => setNotice("")}
+              aria-label={t("companyShowcase.actions.close")}
+            >
+              <FaXmark />
+            </button>
+          </div>
+        )}
+
+        {paymentNotice && (
+          <div className="showcase-payment-notice" role="status">
+            <FaMoneyBillWave aria-hidden="true" />
+            <div>
+              <strong>{t("companyShowcase.payment.title")}</strong>
+              {paymentNotice.reference && (
+                <small>{t("companyShowcase.payment.reference", { reference: paymentNotice.reference })}</small>
+              )}
+              {String(pageConfiguration?.paymentInstructions || "").trim() && (
+                <p className="showcase-payment-notice__text">{pageConfiguration.paymentInstructions}</p>
+              )}
+              <p>{t("companyShowcase.payment.comingSoon")}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPaymentNotice(null)}
               aria-label={t("companyShowcase.actions.close")}
             >
               <FaXmark />
@@ -1768,10 +2481,50 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
             )}
           </div>
 
+          {categoryChips.length > 0 && (
+            <div className="showcase-categories" role="group" aria-label={t("companyShowcase.categories.label")}>
+              <button
+                type="button"
+                className={selectedCategory === "" ? "is-active" : ""}
+                aria-pressed={selectedCategory === ""}
+                onClick={() => chooseCategory("")}
+              >
+                {t("companyShowcase.categories.all")}
+                <span>{companyProducts.length}</span>
+              </button>
+              {categoryChips.map((chip) => (
+                <button
+                  type="button"
+                  key={chip.name}
+                  className={selectedCategory === chip.name ? "is-active" : ""}
+                  aria-pressed={selectedCategory === chip.name}
+                  onClick={() => chooseCategory(chip.name)}
+                >
+                  {chip.name}
+                  <span>{chip.count}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
           {!loadingProducts && !loadError && <div className="product-grid">
             {visibleProducts.map((product) => (
               <article className="showcase-product-card" key={product.id}>
-                <div className="showcase-product-card__image">
+                <div
+                  className={`showcase-product-card__image${product.image ? " is-zoomable" : ""}`}
+                  {...(product.image && {
+                    role: "button",
+                    tabIndex: 0,
+                    "aria-label": t("companyShowcase.product.zoomImage", { product: product.name }),
+                    onClick: () => setZoomProduct(product),
+                    onKeyDown: (event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setZoomProduct(product);
+                      }
+                    },
+                  })}
+                >
                   {product.image ? (
                     <img src={product.image} alt={product.name || t("companyShowcase.fallbacks.productName")} />
                   ) : (
@@ -1780,7 +2533,9 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
                       <span>{t("companyShowcase.fallbacks.imageUnavailable")}</span>
                     </div>
                   )}
-                  <span>{product.category || t("companyShowcase.fallbacks.category")}</span>
+                  {/* Internal category id and product code are kept in the
+                      product data (search, orders, WhatsApp message) but are
+                      not shown to the customer. */}
                   {product.allowsBooking && (
                     <em>
                       <FaCalendarCheck />
@@ -1791,114 +2546,15 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
 
                 <div className="showcase-product-card__content">
                   <div>
-                    <small>{product.code || t("companyShowcase.fallbacks.code")}</small>
                     <h3>{product.name || t("companyShowcase.fallbacks.productName")}</h3>
                     <p>{product.description || t("companyShowcase.fallbacks.productDescription")}</p>
                   </div>
                   <strong className="showcase-product-card__price">
-                    {formatPrice(product.price)}
+                    {formatPrice(product.price, product.currencySymbol)}
                   </strong>
                 </div>
 
-                <div className="showcase-product-card__actions">
-                  {product.allowsOnlineOrder && (
-                    <button
-                      type="button"
-                      className="showcase-button showcase-button--primary"
-                      onClick={() => addToCart(product)}
-                    >
-                      <FaCartPlus />
-                      {t("companyShowcase.actions.orderHere")}
-                    </button>
-                  )}
-
-                  <div className="contact-action">
-                    <button
-                      type="button"
-                      className="showcase-button showcase-button--secondary"
-                      onClick={() =>
-                        setContactProductId((current) =>
-                          current === product.id ? null : product.id,
-                        )
-                      }
-                      aria-expanded={contactProductId === product.id}
-                    >
-                      {t("companyShowcase.actions.contactUs")}
-                      <FaChevronDown />
-                    </button>
-
-                    {contactProductId === product.id && (
-                      <div className="contact-menu">
-                        {/* WhatsApp: enabled only when the product has a phone. */}
-                        {hasWhatsapp(product) ? (
-                          <a
-                            href={whatsappUrl(product)}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <FaWhatsapp />
-                            <span>
-                              <strong>WhatsApp</strong>
-                              <small>{t("companyShowcase.contact.externalChannel")}</small>
-                            </span>
-                          </a>
-                        ) : (
-                          <span
-                            className="contact-menu__item contact-menu__item--disabled"
-                            aria-disabled="true"
-                          >
-                            <FaWhatsapp />
-                            <span>
-                              <strong>WhatsApp</strong>
-                              <small>
-                                {t("companyShowcase.contact.notAvailable", {
-                                  defaultValue: "Not available",
-                                })}
-                              </small>
-                            </span>
-                          </span>
-                        )}
-
-                        {/* Messenger: enabled only when the product has a link. */}
-                        {hasMessenger(product) ? (
-                          <a href={messengerUrl(product)} target="_blank" rel="noreferrer">
-                            <FaFacebookMessenger />
-                            <span>
-                              <strong>Messenger</strong>
-                              <small>{t("companyShowcase.contact.externalChannel")}</small>
-                            </span>
-                          </a>
-                        ) : (
-                          <span
-                            className="contact-menu__item contact-menu__item--disabled"
-                            aria-disabled="true"
-                          >
-                            <FaFacebookMessenger />
-                            <span>
-                              <strong>Messenger</strong>
-                              <small>
-                                {t("companyShowcase.contact.notAvailable", {
-                                  defaultValue: "Not available",
-                                })}
-                              </small>
-                            </span>
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {product.allowsBooking && (
-                    <button
-                      type="button"
-                      className="showcase-button showcase-button--booking"
-                      onClick={() => openBooking(product)}
-                    >
-                      <FaCalendarCheck />
-                      {t("companyShowcase.actions.bookNow")}
-                    </button>
-                  )}
-                </div>
+                {renderProductActions(product)}
               </article>
             ))}
           </div>}
@@ -1977,6 +2633,18 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
         </section>
       </div>
 
+      {zoomProduct && (
+        <ProductZoomDialog
+          product={zoomProduct}
+          priceText={formatPrice(zoomProduct.price, zoomProduct.currencySymbol)}
+          bookingText={t("companyShowcase.product.bookingAvailable")}
+          closeText={t("companyShowcase.actions.close")}
+          brandColor={company.brandColor}
+          actions={renderProductActions(zoomProduct, "zoom")}
+          onClose={() => setZoomProduct(null)}
+        />
+      )}
+
       {showCart && (
         <div className="showcase-overlay" role="dialog" aria-modal="true" aria-labelledby="cart-title">
           <button type="button" className="showcase-overlay__backdrop" onClick={closeCart} aria-label={t("companyShowcase.actions.close")} />
@@ -2008,11 +2676,21 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
                   <div className="cart-lines">
                     {cartItems.map(({ product, quantity }) => (
                       <article key={product.id}>
-                        <img src={product.image} alt="" />
+                        {product.image ? (
+                          <button
+                            type="button"
+                            className="cart-line__zoom"
+                            onClick={() => setZoomProduct(product)}
+                            aria-label={t("companyShowcase.product.zoomImage", { product: product.name })}
+                          >
+                            <img src={product.image} alt="" />
+                          </button>
+                        ) : (
+                          <img src={product.image} alt="" />
+                        )}
                         <div>
                           <strong>{product.name}</strong>
-                          <small>{product.code}</small>
-                          <span>{formatPrice(product.price)}</span>
+                          <span>{formatPrice(product.price, product.currencySymbol)}</span>
                         </div>
                         <div className="quantity-control">
                           <button type="button" onClick={() => changeQuantity(product.id, -1)}><FaMinus /></button>
@@ -2034,8 +2712,12 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
                   <section className="checkout-choice">
                     <div className="cart-total">
                       <span>{t("companyShowcase.cart.subtotal")}</span>
-                      <strong>{formatPrice(cartTotal)}</strong>
+                      <strong>{formatPrice(cartTotal, cartCurrencySymbol)}</strong>
                     </div>
+                    {!acceptingOrders ? (
+                      <p className="showcase-closed-note" role="status">{notTakingOrdersText}</p>
+                    ) : (
+                    <>
                     <p>{t("companyShowcase.cart.checkoutDescription")}</p>
 
                     <button
@@ -2054,6 +2736,8 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
                       <FaCircleUser />
                       {t("companyShowcase.checkout.continueAsGuest")}
                     </button>
+                    </>
+                    )}
                   </section>
                 </>
               )}
@@ -2173,6 +2857,9 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
                     <span>{t("companyShowcase.form.notes")}</span>
                     <textarea name="notes" rows="3" value={guestForm.notes} onChange={updateGuestForm} placeholder={t("companyShowcase.form.notesPlaceholder")} />
                   </label>
+                  {legalNotice}
+                  <CaptchaWidget captcha={orderCaptcha} language={locale} />
+                  {orderCaptcha.loadError && <p className="showcase-form__hint">{captchaPendingText}</p>}
                   <button type="submit" className="showcase-button showcase-button--primary" disabled={guestSaving}>
                     <FaCheck />
                     {guestSaving
@@ -2302,15 +2989,18 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
                     {cartItems.map((item) => (
                       <li key={item.product.id}>
                         <span>{item.product.name} × {item.quantity}</span>
-                        <strong>{formatPrice(item.product.price * item.quantity)}</strong>
+                        <strong>{formatPrice(item.product.price * item.quantity, item.product.currencySymbol)}</strong>
                       </li>
                     ))}
                   </ul>
                   <div className="cart-total">
                     <span>{t("companyShowcase.cart.subtotal")}</span>
-                    <strong>{formatPrice(cartTotal)}</strong>
+                    <strong>{formatPrice(cartTotal, cartCurrencySymbol)}</strong>
                   </div>
 
+                  {legalNotice}
+                  <CaptchaWidget captcha={orderCaptcha} language={locale} />
+                  {orderCaptcha.loadError && <p className="showcase-form__hint">{captchaPendingText}</p>}
                   <button type="submit" className="showcase-button showcase-button--primary" disabled={guestSaving}>
                     <FaCheck />
                     {guestSaving
@@ -2340,15 +3030,35 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
             await showcaseLoginService.logout();
             setMockUser(null);
             setAuthOrigin(null);
+            setShowMyRequests(false);
             if (checkoutMode === "account") setCheckoutMode(null);
           }}
+          onOpenMyRequests={() => {
+            setAuthOrigin(null);
+            setShowMyRequests(true);
+          }}
+        />
+      )}
+
+      {showMyRequests && mockUser && (
+        <MyRequests
+          t={t}
+          locale={locale}
+          companyKey={companySlug}
+          formatPrice={formatPrice}
+          onClose={() => setShowMyRequests(false)}
         />
       )}
 
       {bookingProduct && (
         <div className="showcase-overlay showcase-overlay--center" role="dialog" aria-modal="true" aria-labelledby="booking-title">
           <button type="button" className="showcase-overlay__backdrop" onClick={closeBooking} aria-label={t("companyShowcase.actions.close")} />
-          <form className="booking-dialog" onSubmit={submitBooking}>
+          <form
+            className="booking-dialog"
+            onSubmit={submitBooking}
+            ref={bookingDialogRef}
+            onScroll={(event) => setBookingShowTop(event.currentTarget.scrollTop > 280)}
+          >
             <header>
               <div>
                 <span><FaCalendarCheck /></span>
@@ -2365,57 +3075,6 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
                 {t("companyShowcase.booking.description")}
               </p>
               <div className="booking-form-grid">
-                <label>
-                  <span>{t("companyShowcase.form.name")}</span>
-                  <input name="name" value={bookingForm.name} onChange={updateBookingForm} required />
-                </label>
-                <label>
-                  <span>{t("companyShowcase.form.phone")}</span>
-                  <input name="phone" value={bookingForm.phone} onChange={updateBookingForm} required />
-                </label>
-                <label className="booking-form-grid__full">
-                  <span>{t("companyShowcase.form.email")}</span>
-                  <input type="email" name="email" value={bookingForm.email} onChange={updateBookingForm} required />
-                </label>
-
-                <label>
-                  <span>
-                    {t("companyShowcase.form.preferredContact", { defaultValue: "Preferred contact" })}
-                  </span>
-                  <select name="preferredContact" value={bookingForm.preferredContact} onChange={updateBookingForm}>
-                    <option value="whatsapp">WhatsApp</option>
-                    <option value="phone">{t("companyShowcase.form.phoneOption", { defaultValue: "Phone call" })}</option>
-                    <option value="messenger">Messenger</option>
-                    <option value="social">{t("companyShowcase.form.socialOption", { defaultValue: "Social network" })}</option>
-                    <option value="email">{t("companyShowcase.form.emailOption", { defaultValue: "Email" })}</option>
-                  </select>
-                </label>
-
-                <label>
-                  <span>
-                    {bookingForm.preferredContact === "email"
-                      ? t("companyShowcase.form.contactEmail", { defaultValue: "Contact email" })
-                      : bookingForm.preferredContact === "messenger" ||
-                        bookingForm.preferredContact === "social"
-                      ? t("companyShowcase.form.contactSocial", { defaultValue: "Profile / link" })
-                      : t("companyShowcase.form.contactPhone", { defaultValue: "Contact number" })}
-                  </span>
-                  <input
-                    type={bookingForm.preferredContact === "email" ? "email" : "text"}
-                    name="contactValue"
-                    value={bookingForm.contactValue}
-                    onChange={updateBookingForm}
-                    placeholder={
-                      bookingForm.preferredContact === "email"
-                        ? "name@example.com"
-                        : bookingForm.preferredContact === "messenger" ||
-                          bookingForm.preferredContact === "social"
-                        ? "https://..."
-                        : "+506 8888 7777"
-                    }
-                  />
-                </label>
-
                 <div className="booking-form-grid__full booking-calendar-block">
                   <span className="booking-field-label">
                     {t("companyShowcase.booking.preferredDate", { defaultValue: "Choose a date" })}
@@ -2469,10 +3128,14 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
 
                   {/* Slots for the chosen date */}
                   {bookingForm.preferredDate && (
-                    <div className="booking-slots">
+                    <div className="booking-slots" ref={bookingSlotsRef}>
                       <span className="booking-field-label">
                         {t("companyShowcase.booking.availableSlots", { defaultValue: "Available times" })}
                       </span>
+
+                      {slotTakenNotice && (
+                        <p className="booking-slots__hint booking-slots__hint--error" role="alert">{slotTakenNotice}</p>
+                      )}
 
                       {slotsLoading ? (
                         <p className="booking-slots__hint">
@@ -2485,42 +3148,117 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
                           {t("companyShowcase.booking.noSlots", { defaultValue: "No times available for this date." })}
                         </p>
                       ) : (
-                        <div className="booking-slots__list">
-                          {daySlots.map((slot, i) => {
-                            const key = `${slot.startTime}-${slot.endTime}`;
-                            const label = slot.allDay
-                              ? t("companyShowcase.booking.allDay", { defaultValue: "All day" })
-                              : `${slot.startTime} - ${slot.endTime}`;
-                            return (
-                              <button
-                                key={`${key}-${i}`}
-                                type="button"
-                                className={[
-                                  "booking-slot",
-                                  selectedSlotKey === key ? "is-selected" : "",
-                                ].filter(Boolean).join(" ")}
-                                onClick={() => selectSlot(slot)}
-                              >
-                                <span>{label}</span>
-                                <small>
-                                  {slot.remaining}{" "}
-                                  {t("companyShowcase.booking.left", { defaultValue: "left" })}
-                                </small>
-                              </button>
-                            );
+                        renderSlotGroups()
+                      )}
+
+                      {slotsZoneInfo && (
+                        <p className="booking-slots__zone">
+                          {t("companyShowcase.booking.timesShownIn", {
+                            defaultValue: "Times shown in: {{zone}} ({{offset}}).",
+                            zone: slotsZoneInfo.zoneName,
+                            offset: slotsZoneInfo.offset,
                           })}
-                        </div>
+                          {slotsZoneInfo.differentZone &&
+                            ` ${t("companyShowcase.booking.otherZoneHint", {
+                              defaultValue: "Your device is in another time zone: each time also shows your time.",
+                            })}`}
+                        </p>
                       )}
                     </div>
                   )}
                 </div>
-                <label className="booking-form-grid__full">
-                  <span>{t("companyShowcase.form.notes")}</span>
-                  <textarea name="notes" rows="4" value={bookingForm.notes} onChange={updateBookingForm} placeholder={t("companyShowcase.booking.notesPlaceholder")} />
-                </label>
               </div>
+
+              {/* Your information (2026-11-08): last part of the form. After a
+                  time is chosen the window scrolls here ("Your choice" on top). */}
+              <section className="booking-info" ref={bookingInfoRef} aria-labelledby="booking-info-title">
+                {selectedSlot && bookingForm.preferredDate && (
+                  <div className="booking-choice" ref={bookingChoiceRef} role="status" aria-live="polite">
+                    <FaCalendarCheck aria-hidden="true" />
+                    <div>
+                      <strong>{t("companyShowcase.booking.yourChoice", { defaultValue: "Your choice" })}</strong>
+                      <p>
+                        {choiceWhenText(bookingForm.preferredDate, selectedSlot)}
+                      </p>
+                      {selectedSlot.locationName && (
+                        <p className="booking-choice__place">
+                          <FaLocationDot aria-hidden="true" />
+                          {[selectedSlot.locationName, selectedSlot.locationAddress].filter(Boolean).join(", ")}
+                        </p>
+                      )}
+                      <small>
+                        {t("companyShowcase.booking.changeChoice", {
+                          defaultValue: "To change it, pick another date or time above.",
+                        })}
+                      </small>
+                    </div>
+                  </div>
+                )}
+                <h3 id="booking-info-title" className="booking-info__title">
+                  {t("companyShowcase.booking.yourInfo", { defaultValue: "Your information" })}
+                </h3>
+                <div className="booking-form-grid">
+                  <label>
+                    <span>{t("companyShowcase.form.name")}</span>
+                    <input name="name" value={bookingForm.name} onChange={updateBookingForm} required />
+                  </label>
+                  <label>
+                    <span>{t("companyShowcase.form.phone")}</span>
+                    <input name="phone" value={bookingForm.phone} onChange={updateBookingForm} required />
+                  </label>
+                  <label className="booking-form-grid__full">
+                    <span>{t("companyShowcase.form.email")}</span>
+                    <input type="email" name="email" value={bookingForm.email} onChange={updateBookingForm} required />
+                  </label>
+
+                  <label>
+                    <span>
+                      {t("companyShowcase.form.preferredContact", { defaultValue: "Preferred contact" })}
+                    </span>
+                    <select name="preferredContact" value={bookingForm.preferredContact} onChange={updateBookingForm}>
+                      <option value="whatsapp">WhatsApp</option>
+                      <option value="phone">{t("companyShowcase.form.phoneOption", { defaultValue: "Phone call" })}</option>
+                      <option value="messenger">Messenger</option>
+                      <option value="social">{t("companyShowcase.form.socialOption", { defaultValue: "Social network" })}</option>
+                      <option value="email">{t("companyShowcase.form.emailOption", { defaultValue: "Email" })}</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    <span>
+                      {bookingForm.preferredContact === "email"
+                        ? t("companyShowcase.form.contactEmail", { defaultValue: "Contact email" })
+                        : bookingForm.preferredContact === "messenger" ||
+                          bookingForm.preferredContact === "social"
+                        ? t("companyShowcase.form.contactSocial", { defaultValue: "Profile / link" })
+                        : t("companyShowcase.form.contactPhone", { defaultValue: "Contact number" })}
+                    </span>
+                    <input
+                      type={bookingForm.preferredContact === "email" ? "email" : "text"}
+                      name="contactValue"
+                      value={bookingForm.contactValue}
+                      onChange={updateBookingForm}
+                      placeholder={
+                        bookingForm.preferredContact === "email"
+                          ? "name@example.com"
+                          : bookingForm.preferredContact === "messenger" ||
+                            bookingForm.preferredContact === "social"
+                          ? "https://..."
+                          : "+506 8888 7777"
+                      }
+                    />
+                  </label>
+
+                  <label className="booking-form-grid__full">
+                    <span>{t("companyShowcase.form.notes")}</span>
+                    <textarea name="notes" rows="4" value={bookingForm.notes} onChange={updateBookingForm} placeholder={t("companyShowcase.booking.notesPlaceholder")} />
+                  </label>
+                </div>
+              </section>
             </div>
 
+            {legalNotice && <div className="booking-legal">{legalNotice}</div>}
+            <CaptchaWidget captcha={bookingCaptcha} language={locale} style={{ padding: "0 20px" }} />
             <footer>
               <button type="button" className="showcase-button showcase-button--secondary" onClick={closeBooking}>
                 {t("companyShowcase.actions.cancel")}
@@ -2532,8 +3270,67 @@ export default function CompanyShowcase({ t, locale = "en-US" }) {
                   : t("companyShowcase.booking.submit")}
               </button>
             </footer>
+            {bookingShowTop && (
+              <div className="booking-dialog__top-wrap">
+                <button
+                  type="button"
+                  className="booking-dialog__top"
+                  onClick={() => bookingDialogRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+                  aria-label={t("companyShowcase.booking.backToTop", { defaultValue: "Back to top" })}
+                  title={t("companyShowcase.booking.backToTop", { defaultValue: "Back to top" })}
+                >
+                  <FaArrowUp aria-hidden="true" />
+                </button>
+              </div>
+            )}
           </form>
         </div>
+      )}
+
+      {hasLegalTexts && (
+        <footer className="showcase-legal-footer">
+          <span>{bannerName || company?.name || ""}</span>
+          {legalLinks}
+        </footer>
+      )}
+
+      <RequestSentDialog
+        t={t}
+        info={requestSent}
+        companyName={bannerName || company?.name || ""}
+        contact={{
+          whatsapp: pageConfiguration?.contactWhatsapp,
+          email: pageConfiguration?.contactEmail,
+          socialLink: pageConfiguration?.socialLink,
+          socialLinkType: pageConfiguration?.socialLinkType,
+        }}
+        onClose={closeRequestSent}
+      />
+
+      {/* AlephK (2026-10-25): small "Powered by Kuantum K" line. */}
+      <PoweredBy label={t("brand.poweredBy", { defaultValue: "Powered by" })} />
+
+      {legalDoc && (
+        <ShowcaseLegalDialog
+          title={legalDoc === "terms" ? legalLabel("terms", "Terms and conditions") : legalLabel("privacy", "Privacy policy")}
+          body={legalDoc === "terms" ? termsText : privacyText}
+          closeText={legalLabel("close", "Close")}
+          brandColor={company?.brandColor}
+          onClose={() => setLegalDoc(null)}
+        />
+      )}
+
+      {/* The AI assistant is a plan feature: hidden when the company's plan
+          does not include it (shao returns assistantEnabled: false). */}
+      {pageConfiguration?.assistantEnabled !== false && (
+      <ShowcaseAssistant
+        t={t}
+        locale={locale}
+        companyId={company?.id || companySlug}
+        companyName={bannerName || company?.name || ""}
+        cart={cart}
+        onAction={handleAssistantAction}
+      />
       )}
     </main>
   );

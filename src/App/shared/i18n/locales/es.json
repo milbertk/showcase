@@ -8,10 +8,9 @@
       "languageChanged": "The language has been changed."
     }
   },
-
   "companyShowcase": {
     "brandName": "Showcase",
-    "publicStore": "Vitrina pública",
+    "publicStore": "Tienda en línea",
     "verifiedCompany": "Empresa verificada",
     "companyLink": "/showcase/{{slug}}",
     "search": {
@@ -32,15 +31,18 @@
     },
     "product": {
       "bookingAvailable": "Reserva disponible",
+      "zoomImage": "Ampliar imagen de {{product}}",
       "customQuote": "Cotización personalizada"
     },
     "actions": {
       "explore": "Explorar el catálogo",
+      "added": "Agregado",
       "orderHere": "Ordenar aquí",
       "contactUs": "Contáctenos",
       "bookNow": "Reservar",
       "close": "Cerrar",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "bookingByContact": "Para reservar este servicio, contacta al negocio."
     },
     "fallbacks": {
       "companyName": "Vitrina de la empresa",
@@ -85,7 +87,8 @@
       "createAccount": "Crear una cuenta nueva",
       "member": "Miembro",
       "guestType": "invitado",
-      "memberType": "miembro"
+      "memberType": "miembro",
+      "sending": "Enviando..."
     },
     "booking": {
       "title": "Solicitar una reserva",
@@ -93,7 +96,31 @@
       "preferredDate": "Fecha preferida",
       "preferredTime": "Hora preferida",
       "notesPlaceholder": "Describa lo que necesita para este servicio",
-      "submit": "Enviar solicitud de reserva"
+      "submit": "Enviar solicitud de reserva",
+      "slotTaken": "Este horario acaba de ser tomado. Por favor elija otro.",
+      "allDay": "Todo el día",
+      "availableSlots": "Horarios disponibles",
+      "left": "disponibles",
+      "loadingSlots": "Cargando horarios...",
+      "missingCompany": "Falta la información de la empresa o del producto.",
+      "noSlots": "No hay horarios disponibles para esta fecha.",
+      "pickSlot": "Elige una fecha y un horario disponible.",
+      "sending": "Enviando...",
+      "slotsError": "No se pudieron cargar los horarios. Intenta de nuevo.",
+      "submitError": "No se pudo enviar tu solicitud. Intenta de nuevo.",
+      "timesShownIn": "Horas según: {{zone}} ({{offset}}).",
+      "otherZoneHint": "Su dispositivo está en otra zona horaria: cada hora muestra también su hora.",
+      "yourTime": "= {{time}} su hora",
+      "locationFilter": "Sede",
+      "allLocations": "Todas las sedes",
+      "otherTimes": "Otros horarios",
+      "openMaps": "Abrir en Maps",
+      "locationNotice": "Sede: {{location}}.",
+      "customerChooses": "Usted elige la sede: escoja la hora en la sede que prefiera.",
+      "yourInfo": "Sus datos",
+      "yourChoice": "Su elección",
+      "changeChoice": "Para cambiarla, elija otra fecha u hora arriba.",
+      "backToTop": "Volver arriba"
     },
     "form": {
       "name": "Nombre completo",
@@ -105,16 +132,217 @@
       "emailOption": "Correo electrónico",
       "phoneOption": "Llamada telefónica",
       "notes": "Notas",
-      "notesPlaceholder": "Agregue medidas, detalles de personalización o instrucciones de entrega"
+      "notesPlaceholder": "Agregue medidas, detalles de personalización o instrucciones de entrega",
+      "contactEmail": "Agrega tu correo",
+      "contactPhone": "Agrega tu celular",
+      "contactSocial": "Agrega el enlace de tu red social",
+      "needsDelivery": "Necesito entrega a domicilio (si no, lo recojo)",
+      "pickupNote": "Elegiste recoger: retirarás el pedido en la empresa.",
+      "socialOption": "Red social"
     },
     "messages": {
       "addedToCart": "{{product}} se ha agregado al carrito.",
       "orderCreated": "La orden {{reference}} se ha creado para {{name}} como una orden de {{customerType}}.",
-      "bookingCreated": "La solicitud de reserva {{reference}} se ha creado para {{service}}."
+      "bookingCreated": "La solicitud de reserva {{reference}} se ha creado para {{service}}.",
+      "deliveryTarget": "Para la entrega, escribe una dirección o selecciona una ubicación en el mapa.",
+      "emptyCart": "Tu carrito está vacío.",
+      "missingCompany": "No hay una empresa seleccionada.",
+      "orderError": "No se pudo enviar tu pedido. Intenta de nuevo.",
+      "notTakingOrders": "Esta tienda no está recibiendo pedidos en este momento. Por favor contacte al negocio.",
+      "tooManyRequests": "Se enviaron demasiadas solicitudes hoy. Intente de nuevo mañana o contacte directamente al negocio.",
+      "invalidEmail": "Revise el correo electrónico.",
+      "invalidPhone": "Revise el número de teléfono.",
+      "invalidData": "Revise los datos del formulario (algún texto es demasiado largo).",
+      "captchaPending": "Complete la verificación de seguridad (el recuadro sobre el botón) e intente de nuevo.",
+      "captchaFailed": "La verificación de seguridad falló. Complétela de nuevo y vuelva a enviar.",
+      "captchaUnavailable": "La verificación de seguridad no está disponible en este momento. Intente de nuevo en un momento."
     },
     "notFound": {
       "title": "No se encontró la vitrina de la empresa",
       "description": "No se encontró una empresa pública para “{{slug}}”. Revise el enlace de la empresa e inténtelo nuevamente."
+    },
+    "logoAlt": "Logo de {{name}}",
+    "categories": {
+      "label": "Ver por categoría",
+      "all": "Todo"
+    },
+    "payment": {
+      "title": "Cómo pagar",
+      "reference": "Referencia del pedido: {{reference}}",
+      "comingSoon": "Los pagos en línea llegarán pronto. Un agente le contactará con las instrucciones de pago."
+    },
+    "legal": {
+      "terms": "Términos y condiciones",
+      "privacy": "Política de privacidad",
+      "notice": "Al enviar, aceptas:",
+      "close": "Cerrar"
+    },
+    "theme": {
+      "toDark": "Cambiar a modo oscuro",
+      "toLight": "Cambiar a modo claro"
+    },
+    "clock": {
+      "yourTime": "= {{time}} su hora",
+      "title": "Hora del negocio: {{time}}, {{zone}} ({{offset}})"
     }
+  },
+  "showcaseAssistant": {
+    "launcher": "Pregúntale a Aleph",
+    "open": "Abrir el asistente de compras",
+    "close": "Cerrar el asistente",
+    "title": "Aleph",
+    "subtitle": "Asistente de compras · {{company}}",
+    "welcome": "¡Hola! Soy Aleph, el asistente de {{company}}. Te ayudo a encontrar productos, agregarlos al carrito, reservar una cita o contactar a la tienda.",
+    "suggestionProducts": "¿Qué ofrecen?",
+    "suggestionBooking": "Quiero reservar una cita",
+    "suggestionCart": "¿Qué tengo en el carrito?",
+    "placeholder": "Escribe tu pregunta...",
+    "listening": "Escuchando... (espero mientras haces pausas)",
+    "send": "Enviar",
+    "dictate": "Hablar",
+    "stopDictation": "Detener y enviar",
+    "thinking": "Pensando...",
+    "clear": "Borrar conversación",
+    "error": "Lo siento, no pude responder en este momento. Inténtalo de nuevo.",
+    "limit": "El asistente llegó al límite de hoy. Puedes seguir navegando y comprando normalmente.",
+    "unavailable": "El asistente no está disponible para esta tienda.",
+    "voiceError": "No se pudo usar el micrófono.",
+    "voiceUnsupported": "Este navegador no permite dictar por voz.",
+    "disclaimer": "Aleph puede equivocarse. Tú siempre confirmas tu pedido o tu reserva.",
+    "noteAdded": "Agregado al carrito: {{quantity}} × {{product}}",
+    "noteQuantity": "Carrito actualizado: {{quantity}} × {{product}}",
+    "noteRemoved": "Quitado del carrito: {{product}}",
+    "noteBooking": "Formulario de reserva abierto: {{product}}",
+    "noteCart": "Carrito abierto. Revísalo y confirma tu pedido.",
+    "noteLogin": "Ventana de inicio de sesión abierta.",
+    "lastQuestion": "Esa fue tu última pregunta de hoy. Vuelve mañana.",
+    "remaining_one": "Te queda {{count}} pregunta hoy.",
+    "remaining_other": "Te quedan {{count}} preguntas hoy.",
+    "selectLanguage": "Seleccionar idioma"
+  },
+  "manageRequest": {
+    "title": "Su solicitud",
+    "company": "Tienda",
+    "loading": "Cargando...",
+    "working": "Procesando...",
+    "titles": {
+      "appointment": "Su cita",
+      "webOrder": "Su solicitud de pedido",
+      "order": "Su pedido"
+    },
+    "reference": "Referencia",
+    "service": "Servicio",
+    "date": "Fecha",
+    "time": "Hora",
+    "total": "Total",
+    "allDay": "Todo el día",
+    "status": {
+      "PENDING": "Pendiente de confirmar",
+      "SCHEDULED": "Confirmada",
+      "APPROVED": "Aceptado",
+      "REJECTED": "No aceptado",
+      "CANCELLED": "Cancelado",
+      "DONE": "Listo",
+      "COMPLETED": "Completado",
+      "PLACED": "Recibido",
+      "IN_PROGRESS": "En proceso",
+      "PARTIAL_DONE": "Parcialmente listo",
+      "READY": "Listo para entregar",
+      "DELIVERED": "Entregado"
+    },
+    "pendingNote": "La empresa todavía debe confirmar este horario. Recibirá un correo.",
+    "actions": {
+      "reschedule": "Solicitar otro horario",
+      "keep": "No, mantenerla",
+      "sendNewTime": "Enviar nuevo horario",
+      "whatsapp": "Escríbanos por WhatsApp",
+      "backToStore": "Volver a la tienda",
+      "requestCancel": "¿Necesita cancelar? Solicite la cancelación",
+      "sendCancelRequest": "Enviar solicitud"
+    },
+    "rescheduled": "Su nuevo horario fue enviado. La empresa lo confirmará por correo.",
+    "pickNewTime": "Elija una nueva fecha y hora",
+    "loadingTimes": "Cargando horarios...",
+    "noTimes": "No hay horarios disponibles para esta fecha.",
+    "tooLate": "Puede hacer cambios hasta {{hours}} horas antes de la cita. Por favor contacte a la empresa.",
+    "whatsappMessage": "Hola, tengo una consulta sobre {{reference}}.",
+    "errors": {
+      "notFound": "Este enlace no es válido. Revise el correo que recibió.",
+      "notAllowed": "Esta acción ya no es posible.",
+      "slotTaken": "Este horario acaba de ser tomado. Por favor elija otro.",
+      "sameTime": "Elija un horario diferente al actual.",
+      "rateLimit": "Demasiados intentos. Intente más tarde.",
+      "slots": "No se pudieron cargar los horarios disponibles.",
+      "generic": "Algo salió mal. Intente de nuevo.",
+      "alreadyRequested": "Ya envió una solicitud de cancelación. El negocio le contactará.",
+      "cancelUnavailable": "No se pudo enviar la solicitud en este momento. Por favor contacte directamente al negocio."
+    },
+    "cancelRequested": "Su solicitud de cancelación fue enviada. El negocio se la confirmará por correo.",
+    "cancelRequestedOn": "Cancelación solicitada el {{date}}. El negocio se la confirmará por correo.",
+    "cancelForm": {
+      "title": "Solicitar cancelación",
+      "noteAppointment": "Su cita todavía no está cancelada. El negocio revisará su solicitud y se la confirmará por correo.",
+      "noteOrder": "Su pedido todavía no está cancelado. El negocio revisará su solicitud y se la confirmará por correo.",
+      "reason": "Motivo (opcional)",
+      "reasonPlaceholder": "Por ejemplo: no podré asistir ese día."
+    },
+    "yourTime": "= {{time}} su hora",
+    "timesShownIn": "Horas según: {{zone}}.",
+    "location": "Sede",
+    "openMaps": "Abrir en Maps",
+    "otherTimes": "Otros horarios"
+  },
+  "myRequests": {
+    "title": "Mis pedidos y reservas",
+    "orders": "Pedidos",
+    "bookings": "Reservas",
+    "booking": "Reserva",
+    "loading": "Cargando…",
+    "loadError": "No se pudieron cargar sus pedidos y reservas. Intente de nuevo.",
+    "signInAgain": "Su sesión terminó. Inicie sesión de nuevo.",
+    "notVerified": "Su correo aún no está verificado, por eso solo se muestran los pedidos hechos con la sesión iniciada. Verifique su correo para ver también las solicitudes hechas con él.",
+    "groups": {
+      "all": "Todos",
+      "pending": "En espera",
+      "active": "En proceso",
+      "closed": "Terminados"
+    },
+    "emptyOrders": "Aún no tiene pedidos en esta tienda.",
+    "emptyBookings": "Aún no tiene reservas en esta tienda.",
+    "emptyFilter": "No hay nada en este grupo.",
+    "view": "Ver"
+  },
+  "requestSent": {
+    "theCompany": "la empresa",
+    "booking": {
+      "title": "Solicitud de cita enviada — pendiente de aprobación",
+      "lead": "Su solicitud de cita fue enviada a {{company}}. Todavía no está confirmada: {{company}} debe aprobarla."
+    },
+    "order": {
+      "title": "Solicitud de orden enviada — pendiente de aprobación",
+      "lead": "Su solicitud de orden fue enviada a {{company}}. Todavía no está confirmada: {{company}} debe aprobarla."
+    },
+    "reschedule": {
+      "title": "Nuevo horario enviado — pendiente de aprobación",
+      "lead": "Su nuevo horario fue enviado a {{company}}. Todavía no está confirmado: {{company}} debe aprobarlo."
+    },
+    "cancel": {
+      "title": "Solicitud de cancelación enviada — pendiente de confirmación",
+      "lead": "Su solicitud de cancelación fue enviada a {{company}}. Todavía no está cancelada: {{company}} debe confirmarla."
+    },
+    "reference": "Referencia",
+    "checkEmail": "Revise su correo ({{email}}).",
+    "checkEmailNoAddress": "Revise su correo.",
+    "copySent": "Le acabamos de enviar una copia y recibirá otro correo cuando {{company}} apruebe o rechace la solicitud.",
+    "copySentCancel": "Le acabamos de enviar una copia y recibirá otro correo cuando {{company}} confirme la cancelación.",
+    "spam": "Revise también las carpetas de Spam o Promociones.",
+    "noEmail": "¿No le llegó ningún correo?",
+    "contactWith": "Contacte a {{company}}:",
+    "contactPlain": "Por favor contacte a {{company}}.",
+    "socialOther": "Red social",
+    "close": "Entendido"
+  },
+  "brand": {
+    "poweredBy": "Impulsado por"
   }
 }

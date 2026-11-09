@@ -27,7 +27,8 @@ export default class AppointmentRequestService {
    *   serviceId, customerName, phone, email, socialLink,
    *   appointmentDate, startHour, endHour, comments }
    */
-  async createRequest({ companyId, request, signal } = {}) {
+  // captchaToken: Cloudflare Turnstile token (2026-10-25), sent as X-Captcha-Token.
+  async createRequest({ companyId, request, captchaToken = "", signal } = {}) {
     const c = String(companyId || "").trim();
     if (!c) throw new TypeError("The company ID is required.");
     if (!request || typeof request !== "object") {
@@ -43,6 +44,7 @@ export default class AppointmentRequestService {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        ...(captchaToken ? { "X-Captcha-Token": captchaToken } : {}),
       },
       body: JSON.stringify(request),
       signal,

@@ -8,10 +8,9 @@
       "languageChanged": "The language has been changed."
     }
   },
-
   "companyShowcase": {
     "brandName": "Showcase",
-    "publicStore": "Public showcase",
+    "publicStore": "Online store",
     "verifiedCompany": "Verified company",
     "companyLink": "/showcase/{{slug}}",
     "search": {
@@ -32,15 +31,18 @@
     },
     "product": {
       "bookingAvailable": "Booking available",
+      "zoomImage": "Enlarge image of {{product}}",
       "customQuote": "Custom quote"
     },
     "actions": {
       "explore": "Explore the collection",
+      "added": "Added",
       "orderHere": "Order here",
       "contactUs": "Contact us",
       "bookNow": "Book now",
       "close": "Close",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "bookingByContact": "To book this service, contact the business."
     },
     "fallbacks": {
       "companyName": "Company showcase",
@@ -85,7 +87,8 @@
       "createAccount": "Create a new account",
       "member": "Member",
       "guestType": "guest",
-      "memberType": "member"
+      "memberType": "member",
+      "sending": "Sending..."
     },
     "booking": {
       "title": "Request a booking",
@@ -93,7 +96,31 @@
       "preferredDate": "Preferred date",
       "preferredTime": "Preferred time",
       "notesPlaceholder": "Describe what you need for this service",
-      "submit": "Submit booking request"
+      "submit": "Submit booking request",
+      "slotTaken": "This time was just taken. Please choose another time.",
+      "noSlots": "No slots available for this date.",
+      "slotsError": "Slots could not be loaded. Please try again.",
+      "pickSlot": "Please choose a date and an available time.",
+      "missingCompany": "Missing company/product context.",
+      "submitError": "Your request could not be sent. Please try again.",
+      "availableSlots": "Available times",
+      "loadingSlots": "Loading times...",
+      "allDay": "All day",
+      "left": "left",
+      "sending": "Sending...",
+      "timesShownIn": "Times shown in: {{zone}} ({{offset}}).",
+      "otherZoneHint": "Your device is in another time zone: each time also shows your time.",
+      "yourTime": "= {{time}} your time",
+      "locationFilter": "Location",
+      "allLocations": "All locations",
+      "otherTimes": "Other times",
+      "openMaps": "Open in Maps",
+      "locationNotice": "Location: {{location}}.",
+      "customerChooses": "You choose the location: pick the time in the location you prefer.",
+      "yourInfo": "Your information",
+      "yourChoice": "Your choice",
+      "changeChoice": "To change it, pick another date or time above.",
+      "backToTop": "Back to top"
     },
     "form": {
       "name": "Full name",
@@ -105,16 +132,217 @@
       "emailOption": "Email",
       "phoneOption": "Phone call",
       "notes": "Notes",
-      "notesPlaceholder": "Add measurements, personalization details, or delivery instructions"
+      "notesPlaceholder": "Add measurements, personalization details, or delivery instructions",
+      "needsDelivery": "I need delivery (otherwise I will pick it up)",
+      "pickupNote": "You chose pickup: you will collect the order at the company.",
+      "socialOption": "Social network",
+      "contactEmail": "Add your email",
+      "contactSocial": "Add your social network link",
+      "contactPhone": "Add your cellphone"
     },
     "messages": {
       "addedToCart": "{{product}} has been added to your cart.",
       "orderCreated": "Order {{reference}} has been created for {{name}} as a {{customerType}} order.",
-      "bookingCreated": "Booking request {{reference}} has been created for {{service}}."
+      "bookingCreated": "Booking request {{reference}} has been created for {{service}}.",
+      "missingCompany": "No company is selected.",
+      "emptyCart": "Your cart is empty.",
+      "deliveryTarget": "For delivery, please enter an address or select a location on the map.",
+      "orderError": "Your order could not be sent. Please try again.",
+      "notTakingOrders": "This store is not taking orders right now. Please contact the business.",
+      "tooManyRequests": "Too many requests were sent today. Please try again tomorrow or contact the business directly.",
+      "invalidEmail": "Please check the email address.",
+      "invalidPhone": "Please check the phone number.",
+      "invalidData": "Please check the data of the form (some text is too long).",
+      "captchaPending": "Please complete the security check (the box above the button) and try again.",
+      "captchaFailed": "The security check failed. Please complete it again and resend.",
+      "captchaUnavailable": "The security check is not available right now. Please try again in a moment."
     },
     "notFound": {
       "title": "Company showcase not found",
       "description": "No public company has been found for “{{slug}}”. Check the company link and try again."
+    },
+    "logoAlt": "{{name}} logo",
+    "categories": {
+      "label": "Browse by category",
+      "all": "All"
+    },
+    "payment": {
+      "title": "How to pay",
+      "reference": "Order reference: {{reference}}",
+      "comingSoon": "Online payments are coming soon. An agent will contact you with the payment instructions."
+    },
+    "legal": {
+      "terms": "Terms and conditions",
+      "privacy": "Privacy policy",
+      "notice": "By sending, you accept:",
+      "close": "Close"
+    },
+    "theme": {
+      "toDark": "Switch to dark mode",
+      "toLight": "Switch to light mode"
+    },
+    "clock": {
+      "yourTime": "= {{time}} your time",
+      "title": "Time of the business: {{time}}, {{zone}} ({{offset}})"
     }
+  },
+  "showcaseAssistant": {
+    "launcher": "Ask Aleph",
+    "open": "Open the shopping assistant",
+    "close": "Close the assistant",
+    "title": "Aleph",
+    "subtitle": "Shopping assistant · {{company}}",
+    "welcome": "Hi! I'm Aleph, the assistant of {{company}}. I can help you find products, add them to your cart, book an appointment or contact the shop.",
+    "suggestionProducts": "What do you offer?",
+    "suggestionBooking": "I want to book an appointment",
+    "suggestionCart": "What is in my cart?",
+    "placeholder": "Write your question...",
+    "listening": "Listening... (I wait while you pause)",
+    "send": "Send",
+    "dictate": "Speak",
+    "stopDictation": "Stop and send",
+    "thinking": "Thinking...",
+    "clear": "Clear conversation",
+    "error": "Sorry, I could not answer right now. Please try again.",
+    "limit": "The assistant has reached today's limit. You can keep browsing and buying normally.",
+    "unavailable": "The assistant is not available for this shop.",
+    "voiceError": "The microphone could not be used.",
+    "voiceUnsupported": "Voice input is not supported in this browser.",
+    "disclaimer": "Aleph can make mistakes. You always confirm your order or booking yourself.",
+    "noteAdded": "Added to your cart: {{quantity}} × {{product}}",
+    "noteQuantity": "Cart updated: {{quantity}} × {{product}}",
+    "noteRemoved": "Removed from your cart: {{product}}",
+    "noteBooking": "Booking form opened: {{product}}",
+    "noteCart": "Cart opened. Review it and confirm your order.",
+    "noteLogin": "Sign in window opened.",
+    "lastQuestion": "That was your last question for today. Come back tomorrow.",
+    "remaining_one": "You have {{count}} question left today.",
+    "remaining_other": "You have {{count}} questions left today.",
+    "selectLanguage": "Select language"
+  },
+  "manageRequest": {
+    "title": "Your request",
+    "company": "Store",
+    "loading": "Loading...",
+    "working": "Working...",
+    "titles": {
+      "appointment": "Your appointment",
+      "webOrder": "Your order request",
+      "order": "Your order"
+    },
+    "reference": "Reference",
+    "service": "Service",
+    "date": "Date",
+    "time": "Time",
+    "total": "Total",
+    "allDay": "All day",
+    "status": {
+      "PENDING": "Pending confirmation",
+      "SCHEDULED": "Confirmed",
+      "APPROVED": "Accepted",
+      "REJECTED": "Not accepted",
+      "CANCELLED": "Cancelled",
+      "DONE": "Done",
+      "COMPLETED": "Completed",
+      "PLACED": "Received",
+      "IN_PROGRESS": "In progress",
+      "PARTIAL_DONE": "Partially done",
+      "READY": "Ready",
+      "DELIVERED": "Delivered"
+    },
+    "pendingNote": "The company still has to confirm this time. You will receive an email.",
+    "actions": {
+      "reschedule": "Request another time",
+      "keep": "No, keep it",
+      "sendNewTime": "Send new time",
+      "whatsapp": "Talk to us on WhatsApp",
+      "backToStore": "Back to the store",
+      "requestCancel": "Need to cancel? Request a cancellation",
+      "sendCancelRequest": "Send request"
+    },
+    "rescheduled": "Your new time was sent. The company will confirm it by email.",
+    "pickNewTime": "Choose a new date and time",
+    "loadingTimes": "Loading times...",
+    "noTimes": "No times available for this date.",
+    "tooLate": "Changes are possible until {{hours}} hours before the appointment. Please contact the company.",
+    "whatsappMessage": "Hello, I have a question about {{reference}}.",
+    "errors": {
+      "notFound": "This link is not valid. Please check the email you received.",
+      "notAllowed": "This action is not possible anymore.",
+      "slotTaken": "This time was just taken. Please choose another time.",
+      "sameTime": "Choose a different time from the current one.",
+      "rateLimit": "Too many attempts. Please try again later.",
+      "slots": "The available times could not be loaded.",
+      "generic": "Something went wrong. Please try again.",
+      "alreadyRequested": "You already sent a cancellation request. The business will contact you.",
+      "cancelUnavailable": "The request could not be sent right now. Please contact the business directly."
+    },
+    "cancelRequested": "Your cancellation request was sent. The business will confirm it by email.",
+    "cancelRequestedOn": "Cancellation requested on {{date}}. The business will confirm it by email.",
+    "cancelForm": {
+      "title": "Request a cancellation",
+      "noteAppointment": "Your appointment is not cancelled yet. The business will review your request and confirm it by email.",
+      "noteOrder": "Your order is not cancelled yet. The business will review your request and confirm it by email.",
+      "reason": "Reason (optional)",
+      "reasonPlaceholder": "For example: I can't make it that day."
+    },
+    "yourTime": "= {{time}} your time",
+    "timesShownIn": "Times shown in: {{zone}}.",
+    "location": "Location",
+    "openMaps": "Open in Maps",
+    "otherTimes": "Other times"
+  },
+  "myRequests": {
+    "title": "My orders and bookings",
+    "orders": "Orders",
+    "bookings": "Bookings",
+    "booking": "Booking",
+    "loading": "Loading…",
+    "loadError": "Your orders and bookings could not be loaded. Please try again.",
+    "signInAgain": "Your session ended. Please sign in again.",
+    "notVerified": "Your email is not verified yet, so only the orders you placed while signed in are shown. Verify your email to also see requests made with it.",
+    "groups": {
+      "all": "All",
+      "pending": "Waiting",
+      "active": "In progress",
+      "closed": "Finished"
+    },
+    "emptyOrders": "You have no orders in this store yet.",
+    "emptyBookings": "You have no bookings in this store yet.",
+    "emptyFilter": "Nothing in this group.",
+    "view": "View"
+  },
+  "requestSent": {
+    "theCompany": "the company",
+    "booking": {
+      "title": "Booking request sent — pending approval",
+      "lead": "Your booking request was sent to {{company}}. It is not confirmed yet: {{company}} must approve it."
+    },
+    "order": {
+      "title": "Order request sent — pending approval",
+      "lead": "Your order request was sent to {{company}}. It is not confirmed yet: {{company}} must approve it."
+    },
+    "reschedule": {
+      "title": "New time sent — pending approval",
+      "lead": "Your new time was sent to {{company}}. It is not confirmed yet: {{company}} must approve it."
+    },
+    "cancel": {
+      "title": "Cancellation request sent — pending confirmation",
+      "lead": "Your cancellation request was sent to {{company}}. It is not cancelled yet: {{company}} must confirm it."
+    },
+    "reference": "Reference",
+    "checkEmail": "Check your email ({{email}}).",
+    "checkEmailNoAddress": "Check your email.",
+    "copySent": "We just sent you a copy, and you will get another email when {{company}} approves or rejects it.",
+    "copySentCancel": "We just sent you a copy, and you will get another email when {{company}} confirms the cancellation.",
+    "spam": "Also look in Spam or Promotions.",
+    "noEmail": "No email?",
+    "contactWith": "Contact {{company}}:",
+    "contactPlain": "Please contact {{company}}.",
+    "socialOther": "Social network",
+    "close": "Got it"
+  },
+  "brand": {
+    "poweredBy": "Powered by"
   }
 }

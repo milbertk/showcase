@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import CompanyShowcase from "../../modules/showcase/components/CompanyShowcase";
+import ManageRequest from "../../modules/showcase/components/ManageRequest";
 
 export default function AppRoutes({ t, locale }) {
   return (
@@ -13,6 +14,13 @@ export default function AppRoutes({ t, locale }) {
       <Route
         path="/showcase/:companySlug"
         element={<CompanyShowcase t={t} locale={locale} />}
+      />
+
+      {/* Customer "manage my request" page, opened from the email link:
+          /showcase/{companyId}/r/{token} */}
+      <Route
+        path="/showcase/:companySlug/r/:token"
+        element={<ManageRequest t={t} locale={locale} />}
       />
 
       {/* Anything else also shows the showcase (adjust if you add a landing). */}

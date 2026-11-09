@@ -7,14 +7,13 @@
 //      productType, hasPrice, basePrice, webBehavior, imageUrl, kind }
 //
 //  Component product shape:
-//    { id, companyId, code, name, category, description, price, image,
+//    { id, companyId, code, name, category, description, price, currencySymbol, image,
 //      allowsOnlineOrder, allowsBooking }
 //
-//  Behavior mapping (from "kind" / webBehavior):
-//    - kind === "BOOKING"  -> allowsBooking = true
-//    - kind === "PRODUCT"  -> allowsOnlineOrder = true
-//    - kind === "SERVICE"  -> contact only (neither order nor booking), unless
-//                             its webBehavior is BOOKING (already caught above)
+//  Behavior mapping (from "kind", decided by shao — 2026-10-31):
+//    - kind === "BOOKING"  -> allowsBooking = true   ("This is an appointment")
+//    - kind === "PRODUCT"  -> allowsOnlineOrder = true ("Available for web sales")
+//    - kind === "SERVICE"  -> only "Contact us" (company WhatsApp / social link)
 // =====================================================================
 
 const PLACEHOLDER_IMAGE = "";
@@ -38,12 +37,17 @@ export function showcaseItemToProduct(item, companyId) {
     code: String(item.productCode || item.product_code || ""),
     name: String(item.name || ""),
     category: String(item.categoryId || item.category_id || ""),
+    // Real category name for the store chips ("" when none; never the id).
+    categoryName: String(item.categoryName || item.category_name || "").trim(),
     description: String(item.description || ""),
     price: item.hasPrice ? basePrice : null,
+    // Store currency (one per company, set in Company page; "$" when none).
+    currencySymbol: String(item.currencySymbol || item.currency_symbol || "").trim() || "$",
     image: String(item.imageUrl || item.image_url || PLACEHOLDER_IMAGE),
     allowsOnlineOrder,
     allowsBooking,
-    // Contact channels (used to enable/disable the WhatsApp/Messenger buttons).
+    // Old per-product contact (kept for reference; "Contact us" now uses the
+    // company WhatsApp and social link from the page configuration).
     webContactPhone: String(item.webContactPhone || item.web_contact_phone || ""),
     webMessengerLink: String(item.webMessengerLink || item.web_messenger_link || ""),
     // Keep the raw kind/behavior in case the UI wants them.

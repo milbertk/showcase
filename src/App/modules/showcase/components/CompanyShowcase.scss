@@ -486,6 +486,73 @@
   }
 
   .booking-dialog__body { padding: 20px; display: grid; gap: 16px; }
+
+  // "Your information" (2026-11-08): last part of the booking form ("Your
+  // choice" on top, then the contact fields). The window scrolls here after a
+  // time is chosen.
+  .booking-info {
+    display: grid;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--sc-line);
+    scroll-margin-top: 8px;
+  }
+
+  .booking-info__title {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  // "Your choice" (2026-11-08): the chosen date, time and location.
+  .booking-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0;
+    padding: 12px 14px;
+    background: color-mix(in srgb, var(--sc-brand) 8%, #fff);
+    border: 1px solid color-mix(in srgb, var(--sc-brand) 35%, #fff);
+    border-radius: 12px;
+
+    > svg { flex: 0 0 auto; margin-top: 3px; color: var(--sc-brand); }
+    strong { display: block; font-size: 14px; }
+    p { margin: 2px 0 0; font-size: 14px; }
+    small { display: block; margin-top: 4px; color: var(--sc-muted); font-size: 12px; }
+  }
+
+  .booking-choice__place {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    svg { flex: 0 0 auto; color: var(--sc-brand); }
+  }
+
+  // Back to top inside the booking window (2026-11-08).
+  .booking-dialog__top-wrap {
+    position: sticky;
+    bottom: 86px; // above the Cancel / Send buttons
+    display: flex;
+    justify-content: flex-end;
+    height: 0;
+    padding-right: 14px;
+    pointer-events: none;
+  }
+
+  .booking-dialog__top {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    color: #fff;
+    background: var(--sc-brand);
+    border: 0;
+    border-radius: 50%;
+    box-shadow: 0 8px 20px rgba(20, 25, 35, 0.25);
+    transform: translateY(-100%);
+    cursor: pointer;
+    pointer-events: auto;
+  }
   .booking-dialog__intro { color: var(--sc-muted); }
 
   .booking-form-grid {
@@ -774,6 +841,8 @@
   @media (max-width: 560px) {
     .contact-menu { position: static; box-shadow: none; &::after { display: none; } }
     .booking-dialog footer { flex-direction: column-reverse; .showcase-button { width: 100%; } }
+    // Two stacked buttons: the back-to-top button sits above both (2026-11-08).
+    .booking-dialog__top-wrap { bottom: 140px; }
   }
 }
 
@@ -1145,10 +1214,10 @@
 
   .showcase-company-banner {
     isolation: isolate;
-    min-height: clamp(330px, 38vw, 500px);
+    min-height: clamp(264px, 30vw, 400px);
     justify-content: center;
     margin: 24px 0 42px;
-    padding: clamp(30px, 6vw, 76px);
+    padding: clamp(24px, 4.8vw, 61px) clamp(30px, 6vw, 76px);
     border-radius: 26px;
     background-image:
       linear-gradient(90deg, rgba(7, 29, 36, .95) 0%, rgba(7, 29, 36, .86) 38%, rgba(7, 29, 36, .2) 74%, rgba(7, 29, 36, .08) 100%),
@@ -1165,6 +1234,25 @@
       border-radius: inherit;
       pointer-events: none;
     }
+  }
+
+  /* Company logo (square, from the page configuration) overlapping the
+     bottom-left edge of the header image. */
+  .showcase-company-banner--with-logo { margin-bottom: 92px; overflow: visible; }
+
+  .showcase-company-banner__logo {
+    position: absolute;
+    left: clamp(30px, 6vw, 76px);
+    bottom: 0;
+    z-index: 1;
+    width: clamp(88px, 10vw, 128px);
+    height: clamp(88px, 10vw, 128px);
+    border: 4px solid #fff;
+    border-radius: 22px;
+    background: #fff;
+    object-fit: cover;
+    box-shadow: 0 14px 32px rgba(18, 52, 59, .22);
+    transform: translateY(50%);
   }
 
   .showcase-company-banner__content {
@@ -1323,8 +1411,8 @@
 
   @media (max-width: 720px) {
     .showcase-company-banner {
-      min-height: 400px;
-      padding: 30px 24px;
+      min-height: 320px;
+      padding: 24px;
       background-image:
         linear-gradient(0deg, rgba(7, 29, 36, .96), rgba(7, 29, 36, .44)),
         var(--showcase-hero);
@@ -1332,6 +1420,8 @@
       align-items: flex-end;
     }
     .showcase-company-banner__content { width: 100%; }
+    .showcase-company-banner--with-logo { padding-bottom: 72px; }
+    .showcase-company-banner__logo { left: 24px; }
     .showcase-company-banner h1 { font-size: clamp(2.1rem, 11vw, 3.5rem); }
   }
 
@@ -1448,6 +1538,8 @@
 
     span { font-weight: 700; font-size: 13px; }
     small { color: var(--sc-muted, #6b727a); font-size: 11px; }
+    /* Visitor in another time zone (2026-11-04): "= 15:00 your time". */
+    .booking-slot__local { color: var(--sc-ink, #1c2024); font-weight: 600; }
 
     &:hover {
       border-color: color-mix(in srgb, var(--sc-brand, #1f2937) 40%, var(--sc-line, #e6e8eb));
@@ -1456,6 +1548,14 @@
       background: color-mix(in srgb, var(--sc-brand, #1f2937) 10%, #fff);
       border-color: var(--sc-brand, #1f2937);
     }
+  }
+
+  /* Company time zone under the slots (2026-11-04). */
+  .booking-slots__zone {
+    margin: 8px 0 0;
+    color: var(--sc-muted, #6b727a);
+    font-size: 12px;
+    line-height: 1.4;
   }
 }
 /* =====================================================================
@@ -1635,6 +1735,14 @@
   }
   .showcase-auth__hint { margin-top: -8px; color: #6b758a; font-size: 12px; }
   .showcase-auth__error { color: #a4262c; font-size: 13px; }
+  .showcase-auth__info { color: #166534; font-size: 13px; }
+  .showcase-auth__forgot {
+    justify-self: end; margin-top: -6px; padding: 0;
+    border: 0; background: none; color: var(--auth-blue);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    &:hover { text-decoration: underline; }
+    &:disabled { opacity: .6; cursor: default; }
+  }
   .showcase-auth__divider {
     display: flex; align-items: center; gap: 16px;
     color: #778297; font-size: 12px;
@@ -1685,5 +1793,784 @@
     .showcase-auth__body { padding: 28px 20px; gap: 20px; }
     .showcase-auth__close { top: -18px; right: -12px; }
     .showcase-auth__providers button { gap: 6px; font-size: 13px; }
+  }
+}
+
+/* =====================================================================
+   PROFESSIONAL POLISH (final override, 2026-10-21).
+   Calmer cards like a retail catalog: even heights, price + buttons at
+   the bottom, quiet hover, clear focus states. Styles only; earlier
+   rules are untouched (backup in .ai_backups/2026-10-21_before_hide_code_and_polish).
+   ===================================================================== */
+.company-showcase {
+  /* ---- Section heading ---- */
+  .showcase-results__heading {
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--sc-line);
+
+    h2 { font-weight: 800; letter-spacing: -.02em; }
+    p { margin-top: 4px; color: var(--sc-muted); font-size: 13px; }
+  }
+
+  .product-grid { align-items: stretch; }
+
+  /* ---- Card: quiet, even, professional ---- */
+  .showcase-product-card {
+    height: 100%;
+    border: 1px solid var(--sc-line);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(18, 52, 59, .04);
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+
+    &::after { display: none; } /* no colored bar */
+
+    &:hover {
+      transform: translateY(-3px);
+      border-color: color-mix(in srgb, var(--sc-brand) 18%, var(--sc-line));
+      box-shadow: 0 14px 34px rgba(18, 52, 59, .10);
+      .showcase-product-card__image > img { transform: scale(1.03); }
+    }
+
+    &:focus-within {
+      border-color: color-mix(in srgb, var(--sc-brand) 35%, var(--sc-line));
+    }
+  }
+
+  /* Image: no light sweep, same size with or without a picture */
+  .showcase-product-card__image {
+    &::after { display: none; }
+    background: var(--sc-soft);
+
+    > img,
+    .showcase-product-card__image-fallback {
+      width: 100%;
+      aspect-ratio: 25 / 18;
+    }
+
+    /* "Booking available" badge floats on the image */
+    > em {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .94);
+      color: var(--sc-ink);
+      font-size: 11px;
+      font-style: normal;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(18, 52, 59, .12);
+      svg { width: 12px; height: 12px; color: var(--sc-brand); }
+    }
+  }
+
+  .showcase-product-card__image-fallback {
+    color: #9aa6ab;
+    span { font-weight: 600; }
+  }
+
+  /* Content: name, short description, price pinned before the buttons */
+  .showcase-product-card__content {
+    flex: 1;
+    gap: 6px;
+    padding: 14px 16px 6px;
+
+    h3 {
+      font-size: .98rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--sc-ink);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    p { margin-top: 2px; line-height: 1.45; }
+  }
+
+  .showcase-product-card__price {
+    margin-top: auto;
+    padding-top: 8px;
+    font-size: 1.12rem;
+    font-weight: 800;
+    color: var(--sc-ink);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
+  }
+
+  .showcase-product-card__actions {
+    margin-top: 0;
+    padding: 8px 16px 16px;
+  }
+
+  .showcase-product-card__actions .showcase-button {
+    min-height: 38px;
+    border-radius: 10px;
+    font-weight: 650;
+    &:hover { transform: none; }
+  }
+
+  /* ---- Keyboard focus (accessibility) ---- */
+  .showcase-button:focus-visible,
+  .showcase-cart-button:focus-visible,
+  .showcase-pagination button:focus-visible,
+  .contact-menu a:focus-visible,
+  .showcase-company-banner__cta:focus-visible {
+    outline: 2px solid var(--sc-brand);
+    outline-offset: 2px;
+  }
+
+  /* ---- Pagination: tidy numbers ---- */
+  .showcase-pagination button { font-variant-numeric: tabular-nums; }
+
+  /* ---- Cart lines: name + price only, aligned ---- */
+  .cart-lines article {
+    img { border-radius: 10px; object-fit: cover; background: var(--sc-soft); }
+    strong { line-height: 1.3; }
+    span { font-variant-numeric: tabular-nums; font-weight: 700; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .company-showcase .showcase-product-card,
+  .company-showcase .showcase-product-card__image > img {
+    transition: none;
+  }
+}
+
+/* =====================================================================
+   PRODUCT ZOOM (2026-10-21). Click a product image (card or cart) to
+   see it big with the name, price and full description.
+   ===================================================================== */
+.company-showcase {
+  .showcase-product-card__image.is-zoomable { cursor: zoom-in; }
+  .showcase-product-card__image.is-zoomable:focus-visible {
+    outline: 2px solid var(--sc-brand);
+    outline-offset: -4px;
+  }
+
+  .cart-line__zoom {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+    border-radius: 10px;
+    &:focus-visible { outline: 2px solid var(--sc-brand); outline-offset: 2px; }
+  }
+}
+
+.company-showcase.showcase-zoom-dialog {
+  position: fixed;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr);
+  width: min(980px, calc(100% - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  min-height: 0;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 20px;
+  background: #fff;
+  color: var(--sc-ink);
+  box-shadow: 0 30px 90px rgba(10, 20, 30, .35);
+  animation: sc-zoom-in .2s ease;
+
+  &:not([open]) { display: none; }
+  &::backdrop { background: rgba(10, 20, 30, .72); backdrop-filter: blur(3px); }
+
+  .showcase-zoom__image {
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    background: #f3f5f6;
+
+    img {
+      width: 100%;
+      height: 100%;
+      max-height: calc(100dvh - 32px);
+      object-fit: contain;
+    }
+  }
+
+  .showcase-zoom__info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 40px 28px 28px;
+    overflow-y: auto;
+
+    h2 { font-size: 1.5rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
+    p { color: var(--sc-muted); font-size: 14px; line-height: 1.6; white-space: pre-line; }
+  }
+
+  .showcase-zoom__badge {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--sc-soft);
+    font-size: 12px;
+    font-weight: 700;
+    svg { color: var(--sc-brand); }
+  }
+
+  .showcase-zoom__price {
+    font-size: 1.35rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .showcase-zoom__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--sc-line);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .95);
+    box-shadow: 0 4px 14px rgba(10, 20, 30, .15);
+    &:hover { background: #fff; }
+    &:focus-visible { outline: 2px solid var(--sc-brand); outline-offset: 2px; }
+    svg { width: 16px; height: 16px; }
+  }
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow-y: auto;
+    .showcase-zoom__image img { max-height: 60dvh; }
+    .showcase-zoom__info { padding: 20px; }
+  }
+}
+
+@keyframes sc-zoom-in {
+  from { opacity: 0; transform: scale(.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .company-showcase.showcase-zoom-dialog { animation: none; }
+}
+
+/* =====================================================================
+   ZOOM CARD + CART + BACKGROUND + SPACING (2026-10-21).
+   Zoom view = landscape product card with the same buttons. Cart lines
+   with thumbnail, separators and a sticky subtotal. Calm off-white page
+   and more generous paddings.
+   ===================================================================== */
+.company-showcase {
+  /* ---- Background: calm off-white, white cards ---- */
+  --sc-page: #f7f7f5;
+  --sc-line: #e5e7e6;
+  background: var(--sc-page);
+
+  /* ---- Spacing (paddings) ---- */
+  .showcase-company-banner { margin-top: 28px; }
+  .showcase-results { padding-top: 8px; }
+  .showcase-results__heading { margin-bottom: 24px; }
+  .product-grid { gap: 24px; }
+
+  .showcase-product-card { background: #fff; }
+  .showcase-product-card__content { padding: 16px 16px 8px; gap: 6px; }
+  .showcase-product-card__actions {
+    gap: 8px;
+    margin: 0 16px;
+    padding: 12px 0 16px;
+    border-top: 1px solid var(--sc-line); /* separator text / buttons */
+  }
+
+  /* "Contact us" quieter, so "Order here" is the main action */
+  .showcase-product-card__actions .showcase-button--secondary {
+    background: transparent;
+    border-color: transparent;
+    color: var(--sc-brand);
+    &:hover { background: color-mix(in srgb, var(--sc-brand) 8%, transparent); color: var(--sc-brand); border-color: transparent; }
+  }
+
+  .showcase-pagination { margin-top: 40px; }
+
+  @media (max-width: 560px) {
+    .product-grid { gap: 16px; }
+  }
+
+  /* ---- Cart header ---- */
+  .showcase-cart header {
+    padding: 18px 20px;
+    > div { display: flex; align-items: center; gap: 12px; }
+    > div > span {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--sc-brand) 10%, #fff);
+      color: var(--sc-brand);
+      svg { width: 18px; height: 18px; }
+    }
+  }
+
+  .showcase-cart__body { padding: 0 20px 20px; }
+
+  /* ---- Cart lines: thumbnail | name + price | quantity | remove ---- */
+  .cart-lines { gap: 0; }
+
+  .cart-lines article {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "img info remove"
+      "img qty  qty";
+    align-items: center;
+    column-gap: 14px;
+    row-gap: 8px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--sc-line); /* separators */
+
+    > img,
+    > .cart-line__zoom { grid-area: img; align-self: start; }
+
+    img {
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: var(--sc-soft);
+      border: 1px solid var(--sc-line);
+    }
+
+    > div:not(.quantity-control) {
+      grid-area: info;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+
+      strong {
+        font-size: .92rem;
+        font-weight: 650;
+        line-height: 1.3;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      span { font-size: .9rem; font-weight: 700; color: var(--sc-ink); }
+    }
+
+    .quantity-control { grid-area: qty; justify-self: start; }
+    .cart-line__remove {
+      grid-area: remove;
+      align-self: start;
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      &:hover { background: #fdeeee; }
+    }
+  }
+
+  /* ---- Subtotal + checkout stay visible at the bottom ---- */
+  .checkout-choice {
+    position: sticky;
+    bottom: -20px;
+    margin: 0 -20px -20px;
+    padding: 16px 20px 20px;
+    background: #fff;
+    border-top: 1px solid var(--sc-line);
+    box-shadow: 0 -10px 24px rgba(18, 52, 59, .06);
+
+    > p { color: var(--sc-muted); font-size: 12.5px; }
+  }
+
+  .cart-total {
+    padding: 0 0 4px;
+    border-top: 0;
+    strong { font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+  }
+}
+
+/* ---- Zoom = landscape product card with the same buttons ---- */
+.company-showcase.showcase-zoom-dialog {
+  width: min(1040px, calc(100% - 32px));
+  min-height: min(560px, calc(100dvh - 32px));
+
+  .showcase-zoom__info {
+    padding: 44px 32px 28px;
+    gap: 14px;
+  }
+
+  .showcase-zoom__actions {
+    display: grid;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid var(--sc-line);
+
+    .showcase-button { min-height: 46px; border-radius: 10px; font-weight: 700; }
+  }
+
+  .showcase-zoom__contact {
+    display: grid;
+    gap: 8px;
+    > span {
+      color: var(--sc-muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .contact-menu {
+      position: static; /* the card version is a floating dropdown */
+      inset: auto;
+      width: auto;
+      transform: none;
+      &::before, &::after { display: none; }
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      box-shadow: none;
+      background: none;
+    }
+    .contact-menu a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--sc-line);
+      border-radius: 10px;
+      &:hover { background: var(--sc-soft); }
+      > span { display: flex; flex-direction: column; }
+      strong { font-size: .9rem; }
+      small { color: var(--sc-muted); font-size: 11.5px; }
+      svg { width: 20px; height: 20px; }
+      svg[class] { flex-shrink: 0; }
+    }
+  }
+
+  @media (max-width: 720px) {
+    min-height: 0;
+    .showcase-zoom__info { padding: 20px; }
+  }
+}
+
+/* =====================================================================
+   CATEGORY CHIPS, PAYMENT NOTICE, MY ORDERS BUTTON (2026-10-22)
+   ===================================================================== */
+.company-showcase {
+  .showcase-categories {
+    display: flex;
+    gap: 8px;
+    margin: -6px 0 20px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+
+    button {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border: 1px solid var(--sc-line, #e5e7eb);
+      border-radius: 999px;
+      background: #fff;
+      color: #334155;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: background .15s ease, border-color .15s ease, color .15s ease;
+
+      span {
+        min-width: 20px;
+        padding: 0 6px;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: 12px;
+        text-align: center;
+      }
+
+      &:hover { border-color: var(--showcase-brand, #155e75); }
+
+      &.is-active {
+        border-color: var(--showcase-brand, #155e75);
+        background: var(--showcase-brand, #155e75);
+        color: #fff;
+
+        span { background: rgba(255, 255, 255, .22); color: #fff; }
+      }
+    }
+  }
+
+  .showcase-payment-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 0 20px;
+    padding: 14px 16px;
+    border: 1px solid #bae6fd;
+    border-radius: 14px;
+    background: #f0f9ff;
+    color: #0c4a6e;
+
+    > svg { flex: 0 0 auto; margin-top: 3px; font-size: 18px; }
+
+    > div {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    small { color: #075985; }
+    p { margin: 0; }
+
+    > button {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #0c4a6e;
+      cursor: pointer;
+    }
+  }
+
+  .showcase-payment-notice__text {
+    font-weight: 650;
+    white-space: pre-line;
+  }
+}
+
+.showcase-auth__my-requests {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  background: #fff !important;
+  color: var(--showcase-brand, #155e75) !important;
+  border: 1px solid var(--showcase-brand, #155e75) !important;
+}
+
+/* Bookings not included in the shop's plan (2026-10-22). */
+.showcase-booking-off {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Store without an active plan: not taking orders (2026-10-23) */
+.showcase-closed-note {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1px solid #f3c27a;
+  border-radius: 10px;
+  background: #fff8eb;
+  color: #7a4b06;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.showcase-closed-note--banner {
+  margin: 16px auto 0;
+  max-width: 1180px;
+}
+
+/* Terms / privacy (texts defined by the company owner) */
+.showcase-legal__links {
+  display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  button {
+    padding: 0; border: 0; background: none; cursor: pointer;
+    color: var(--showcase-brand, #155e75); font: inherit; text-decoration: underline;
+  }
+}
+.showcase-legal__notice { margin: 4px 0 8px; color: #5b6475; font-size: 12px; }
+.booking-legal { padding: 0 24px; }
+.showcase-legal-footer {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
+  max-width: 1180px; margin: 32px auto 0; padding: 20px 16px;
+  border-top: 1px solid #e0e4ec; color: #5b6475; font-size: 13px;
+}
+.showcase-legal-dialog {
+  width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 48px);
+  padding: 0; border: 0; border-radius: 16px;
+  &::backdrop { background: rgba(15, 23, 42, .55); }
+}
+.showcase-legal__body { display: grid; gap: 16px; padding: 24px; }
+.showcase-legal__heading {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  h2 { margin: 0; font-size: 20px; }
+  .showcase-auth__close {
+    display: grid; place-items: center; flex: none;
+    width: 32px; height: 32px; border: 0; border-radius: 50%;
+    background: transparent; color: #6b758a; cursor: pointer;
+    &:hover { background: #f0f3f8; }
+  }
+}
+.showcase-legal__text {
+  max-height: calc(100vh - 180px); overflow-y: auto;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  color: #374151; font-size: 14px; line-height: 1.6;
+}
+
+/* Light / dark mode button in the header (2026-10-24) */
+.company-showcase .showcase-theme-button {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: var(--sc-surface, #fff);
+  border: 1px solid var(--sc-line, #e0e4ec);
+  border-radius: 10px;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover { background: var(--sc-soft, #f3f5f9); }
+  &:focus-visible { outline: 2px solid var(--showcase-brand, #155e75); outline-offset: 2px; }
+  svg { width: 17px; height: 17px; }
+}
+
+/* Store clock (2026-11-04): company time + the visitor's time when different. */
+.company-showcase .showcase-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  background: var(--sc-surface, #fff);
+  border: 1px solid var(--sc-line, #e0e4ec);
+  border-radius: 10px;
+  white-space: nowrap;
+  cursor: default;
+
+  > svg { flex: 0 0 auto; color: var(--sc-brand, #1f2937); font-size: 14px; }
+  span { display: inline-flex; flex-direction: column; line-height: 1.15; }
+  small { max-width: 170px; overflow: hidden; color: var(--sc-muted, #6b727a); font-size: 11px; text-overflow: ellipsis; }
+  strong { color: var(--sc-ink, #1c2024); font-size: 13px; font-variant-numeric: tabular-nums; }
+  em { color: var(--sc-muted, #6b727a); font-size: 11px; font-style: normal; font-weight: 600; }
+
+  @media (max-width: 760px) {
+    small, em { display: none; }
+  }
+
+  @media (max-width: 420px) {
+    display: none;
+  }
+}
+/* =====================================================================
+   Locations ("Sedes", 2026-11-07): free times grouped by location, with the
+   address and "Open in Maps", and a filter when there are 2 or more.
+   ===================================================================== */
+.company-showcase {
+  // "You choose the location" (2026-11-08).
+  .booking-locations-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: 4px 0 8px;
+    color: var(--sc-muted, #6b727a);
+    font-size: 12.5px;
+    line-height: 1.4;
+
+    svg {
+      flex: 0 0 auto;
+      margin-top: 2px;
+      color: var(--sc-brand, #1f2937);
+    }
+  }
+
+  .booking-locations-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0 10px;
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border: 1px solid var(--sc-line, #e6e8eb);
+      border-radius: 999px;
+      background: var(--sc-surface, #fff);
+      color: var(--sc-ink, #1c2024);
+      font-size: 12px;
+      font-weight: 650;
+
+      svg { color: var(--sc-muted, #6b727a); }
+
+      &.is-active {
+        border-color: var(--sc-brand, #1f2937);
+        background: color-mix(in srgb, var(--sc-brand, #1f2937) 10%, #fff);
+
+        svg { color: var(--sc-brand, #1f2937); }
+      }
+    }
+  }
+
+  .booking-location-group {
+    margin-bottom: 12px;
+    padding: 10px;
+    border: 1px solid var(--sc-line, #e6e8eb);
+    border-radius: 12px;
+
+    &:last-child { margin-bottom: 0; }
+  }
+
+  .booking-location-group__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    > svg {
+      flex: 0 0 auto;
+      margin-top: 3px;
+      color: var(--sc-brand, #1f2937);
+    }
+
+    .booking-location-group__text {
+      display: grid;
+      flex: 1 1 auto;
+      gap: 1px;
+      min-width: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    strong { font-size: 14px; }
+    small { color: var(--sc-muted, #6b727a); font-size: 12px; }
+
+    a {
+      flex: 0 0 auto;
+      color: var(--sc-brand, #1f2937);
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: underline;
+      white-space: nowrap;
+    }
   }
 }

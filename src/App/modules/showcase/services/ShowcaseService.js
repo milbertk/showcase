@@ -67,6 +67,47 @@ export default class ShowcaseService {
     return data;
   }
 
+  /**
+   * Loads the PUBLIC page configuration of a company: the appearance set in
+   * the management app (display name, font, logo and header images).
+   *
+   * Backend route (unauthenticated, read-only):
+   * GET /public/companies/{companyId}/page-configuration
+   *
+   * Resolves to { displayName, fontFamily, logoUrl, headerUrl, verified }, or
+   * null when the company has not configured its page yet. `verified` is true
+   * only for companies verified by the platform (shows the badge).
+   */
+  async getPageConfiguration({ companyId, signal } = {}) {
+    const normalizedCompanyId = String(companyId || "").trim();
+    if (!normalizedCompanyId) {
+      throw new TypeError("The company ID is required.");
+    }
+
+    const requestUrl =
+      `${this.baseUrl}/public/companies/` +
+      `${encodeURIComponent(normalizedCompanyId)}/` +
+      `page-configuration`;
+
+    const response = await fetch(requestUrl, {
+      method: "GET",
+      // Public endpoint: no cookies/credentials needed.
+      headers: { Accept: "application/json" },
+      signal,
+    });
+
+    const data = await readResponse(response);
+
+    if (!response.ok) {
+      throw new ShowcaseServiceError(
+        data?.message || `Error loading page configuration: ${response.status}`,
+        { status: response.status, response: data },
+      );
+    }
+
+    return data?.result || null;
+  }
+
   /** Convenience helper: returns just the array of showcase items. */
   async getShowcaseItems(request = {}) {
     const response = await this.getShowcase(request);

@@ -27,7 +27,8 @@ export default class WebOrderRequestService {
    *   socialLink, preferredContact, contactValue, region, address, notes,
    *   items: [{ productId, productCode, productName, quantity, unitPrice }] }
    */
-  async createWebOrder({ companyId, order, signal } = {}) {
+  // captchaToken: Cloudflare Turnstile token (2026-10-25), sent as X-Captcha-Token.
+  async createWebOrder({ companyId, order, captchaToken = "", signal } = {}) {
     const c = String(companyId || "").trim();
     if (!c) throw new TypeError("The company ID is required.");
     if (!order || typeof order !== "object") {
@@ -44,6 +45,7 @@ export default class WebOrderRequestService {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        ...(captchaToken ? { "X-Captcha-Token": captchaToken } : {}),
       },
       body: JSON.stringify(order),
       signal,
